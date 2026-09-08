@@ -1,0 +1,25 @@
+# Training-focused overrides of configs/default.yaml.
+data:
+  zarr_path: data/train/testA.zarr
+  resolution_level: 0
+  voxel_size_um: [1.625, 0.40625, 0.40625]
+  channels: [0]
+  patch_size: [32, 128, 128]
+  patch_stride: [16, 96, 96]
+  frame_pair_stride: 1
+
+model:
+  architecture: unet3d
+  in_channels: 1
+  out_channels: 1
+  base_features: 32
+  depth: 4
+  norm: instance
+
+train:
+  epochs: 100
+  batch_size: 4
+  learning_rate: 0.001
+  num_workers: 4
+  seed: 42
+  output_dir: outputs/train

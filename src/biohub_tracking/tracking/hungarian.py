@@ -1,0 +1,113 @@
+"""Hungarian (optimal bipartite) frame-to-frame tracker with division branching.
+
+The tracker works in two passes per consecutive frame pair:
+
+1. **Primary linking.** An optimal one-to-one assignment (Hungarian
+   algorithm via :func:`scipy.optimize.linear_sum_assignment`) links each
+   source detection to at most one target detection, gated by
+   ``max_link_distance_um`` so implausibly distant pairs are never linked.
+2. **Division branching.** Targets left unmatched after the primary pass are
+   greedily attached as a second (or later) daughter to the nearest already
+   linked source that is still below ``max_daughters`` and within
+   ``division_search_radius_um``, producing the two (or more) outgoing
+   edges that mark a predicted cell division.
+"""
+
+from __future__ import annotations
+
+from collections import defaultdict
+from dataclasses import dataclass
+
+import numpy as np
+from scipy.optimize import linear_sum_assignment
+from scipy.spatial.distance import cdist
+
+from biohub_tracking.tracking.graph import Detection, NodeId, TrackingGraph
+
+_UNREACHABLE_COST = 1e12
+
+
+@dataclass(frozen=True)
+class TrackerConfig:
+    """Gating parameters for :class:`HungarianTracker`."""
+
+    max_link_distance_um: float = 15.0
+    division_search_radius_um: float = 20.0
+    max_daughters: int = 2
+    gating_time_window: int = 1
+
+    def __post_init__(self) -> None:
+        if self.max_link_distance_um <= 0:
+            raise ValueError("max_link_distance_um must be positive")
+        if self.division_search_radius_um <= 0:
+            raise ValueError("division_search_radius_um must be positive")
+        if self.max_daughters < 2:
+            raise ValueError("max_daughters must be >= 2 to represent divisions")
+
+
+class HungarianTracker:
+    """Links detections across frames into a :class:`TrackingGraph`."""
+
+    def __init__(self, config: TrackerConfig | None = None) -> None:
+        self.config = config or TrackerConfig()
+
+    def link_frames(
+        self, sources: list[Detection], targets: list[Detection]
+    ) -> list[tuple[NodeId, NodeId]]:
+        """Link one frame of ``sources`` to the next frame's ``targets``.
+
+        Returns a list of ``(source_id, target_id)`` edges. A source may
+        appear in more than one edge when division branching attaches a
+        second daughter to it.
+        """
+        if not sources or not targets:
+            return []
+
+        cfg = self.config
+        src_pos = np.array([s.position for s in sources], dtype=float)
+        tgt_pos = np.array([t.position for t in targets], dtype=float)
+        dist = cdist(src_pos, tgt_pos)
+
+        cost = np.where(dist <= cfg.max_link_distance_um, dist, _UNREACHABLE_COST)
+        row_ind, col_ind = linear_sum_assignment(cost)
+
+        edges: list[tuple[NodeId, NodeId]] = []
+        matched_target_cols: set[int] = set()
+        out_count: dict[int, int] = defaultdict(int)
+        for r, c in zip(row_ind, col_ind):
+            if dist[r, c] <= cfg.max_link_distance_um:
+                edges.append((sources[r].id, targets[c].id))
+                matched_target_cols.add(c)
+                out_count[r] += 1
+
+        # Division branching: attach unmatched targets as extra daughters.
+        unmatched_cols = [c for c in range(len(targets)) if c not in matched_target_cols]
+        for c in unmatched_cols:
+            candidate_rows = [
+                r
+                for r in range(len(sources))
+                if out_count[r] >= 1
+                and out_count[r] < cfg.max_daughters
+                and dist[r, c] <= cfg.division_search_radius_um
+            ]
+            if not candidate_rows:
+                continue
+            best_r = min(candidate_rows, key=lambda r: dist[r, c])
+            edges.append((sources[best_r].id, targets[c].id))
+            out_count[best_r] += 1
+
+        return edges
+
+    def track(self, graph: TrackingGraph) -> TrackingGraph:
+        """Link every consecutive frame pair of a node-only graph.
+
+        Any pre-existing edges in ``graph`` are discarded; this method is
+        meant to (re)build the edge set from scratch given only detections.
+        """
+        by_frame = graph.nodes_by_frame()
+        result = TrackingGraph(nodes=dict(graph.nodes))
+        frames = sorted(by_frame)
+        for t0, t1 in zip(frames, frames[1:]):
+            for source_id, target_id in self.link_frames(by_frame[t0], by_frame[t1]):
+                result.add_edge(source_id, target_id)
+        return result
