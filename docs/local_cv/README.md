@@ -17,5 +17,6 @@ excluded from evaluation.
 
 The metrics are also recorded in
 [`results/local_cv/public-rule-control-est-budget.csv`](../../results/local_cv/public-rule-control-est-budget.csv)
+and indexed in [`results/local_cv/experiments.csv`](../../results/local_cv/experiments.csv)
 for programmatic comparisons. Competition data, extracted Zarr stores, and
 temporary scorer artifacts are intentionally not tracked.
