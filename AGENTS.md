@@ -275,3 +275,21 @@ ls -l AGENTS.md .github/copilot-instructions.md CLAUDE.md GEMINI.md
 ```text
 Co-authored-by: Copilot App <223556219+Copilot@users.noreply.github.com>
 ```
+
+## Mandatory local evaluation gate
+
+Before recommending or submitting any Kaggle candidate, run local validation or explicitly document why it cannot run. Use:
+
+```bash
+PYTHONPATH=src python3 scripts/local_eval.py \
+  --submission outputs/candidate/submission.csv \
+  --gt-submission data/validation_gt_submission.csv \
+  --cv-pack-dir /path/to/biohub-local-cv-pack \
+  --fold all \
+  --candidate candidate-name \
+  --config configs/inference.yaml \
+  --output-dir outputs/local_eval/candidate-name \
+  --log-experiment
+```
+
+Promotion decisions must inspect `summary.json` and `per_dataset.csv`, especially adjusted edge Jaccard, division Jaccard, node recall, node-count ratio, fragmented edges, detection-lost edges, and wrong-association edges. Public LB alone is not an acceptance criterion.

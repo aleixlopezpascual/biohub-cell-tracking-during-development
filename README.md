@@ -110,3 +110,21 @@ pytest -q
 Tests are synthetic (hand-constructed graphs/arrays) and require no real
 dataset; `torch`-dependent tests are skipped automatically when the `torch`
 extra isn't installed.
+
+## Local validation before submission
+
+Before submitting any candidate to Kaggle, run local evaluation and inspect the component metrics. The recommended protocol is documented in `docs/local_evaluation.md` and follows the community Local CV Pack/prefix-holdout strategy.
+
+```bash
+PYTHONPATH=src python3 scripts/local_eval.py \
+  --submission outputs/candidate/submission.csv \
+  --gt-submission data/validation_gt_submission.csv \
+  --cv-pack-dir /path/to/biohub-local-cv-pack \
+  --fold all \
+  --candidate candidate-name \
+  --config configs/inference.yaml \
+  --output-dir outputs/local_eval/candidate-name \
+  --log-experiment
+```
+
+The command writes `summary.json`, `per_dataset.csv`, and optionally an append-only `local_eval_log.csv` containing commit/config/scorer/split provenance.
