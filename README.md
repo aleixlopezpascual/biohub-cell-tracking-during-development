@@ -29,7 +29,9 @@ pip install -e '.[torch]'   # building/training/running the 3D U-Net
 configs/                  YAML configs validated by biohub_tracking.utils.config.PipelineConfig
 src/biohub_tracking/
   data/                    Lazy OME-Zarr reader (OMEZarrVolume) + 3D patch/frame-pair iteration
+  detection/               Dependency-light 3D local-maxima/blob detector
   models/                  Baseline 3D U-Net (torch-optional interface)
+  pipeline/                Model-free detect-and-track baseline composition
   tracking/                TrackingGraph + Hungarian frame-to-frame linker with division branching
   metrics/                 Official edge Jaccard, division Jaccard, and micro-averaged scoring
   submission/              Strict, deterministic Kaggle submission CSV export
@@ -38,6 +40,7 @@ scripts/
   train.py                 Training entry point (requires the torch extra)
   evaluate.py               Compute the official score from predicted/GT submission CSVs
   infer.py                  Detect + track a volume into a submission CSV (requires the torch extra)
+  baseline_infer.py         Detect blobs + track a volume without a model (requires the zarr extra)
 bundle.py                  Zips the pure-Python package for offline Kaggle notebook submission
 tests/                     Focused synthetic tests (no real data required)
 ```
@@ -85,6 +88,10 @@ python scripts/train.py --config configs/train.yaml
 # Run inference -> submission.csv
 python scripts/infer.py --config configs/inference.yaml \
   --checkpoint outputs/train/unet3d.pt --dataset testA --output submission.csv
+
+# Run the dependency-light blob-detection baseline -> submission.csv
+python scripts/baseline_infer.py --input data/test/testA.zarr --dataset testA \
+  --output submission.csv --threshold 100 --min-distance 5
 
 # Score a prediction against ground truth
 python scripts/evaluate.py --pred submission.csv --gt gt_submission.csv
