@@ -71,3 +71,24 @@ Verified before submitting:
 
 `dataset_sources` was removed from `kernel-metadata.json`; the kernel now
 only depends on `competition_sources`.
+
+## Result
+
+Submission `56107186` scored successfully: **public score 0.251**
+(`SubmissionStatus.COMPLETE`). This is well below the local CV estimate of
+0.5767 for the same candidate. The gap is expected, not a bug:
+
+- Local CV scored a bounded rule-based detector using GT-derived node
+  budgets and per-prefix distance gates tuned against the CV-pack's known
+  train folds (`results/local_cv/README.md`).
+- The live Kaggle kernel must generalize to test data with no ground truth
+  available, so it derives its detection threshold and linking distance gate
+  only from generic per-dataset OME-Zarr metadata (`image_statistics`
+  quantiles, physical `scale`) rather than any oracle node-count/gate value.
+  This is a materially weaker heuristic than the CV-pack's GT-informed
+  settings, so a substantial LB/CV gap for this exact rule-based baseline is
+  expected.
+
+This LB score should be treated as the calibration point for "rule-based
+detector with no oracle budget," not as a discrepancy to chase down further.
+
