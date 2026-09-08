@@ -16,6 +16,6 @@ failed with the extracted Zarr layout. The four public-test twins were
 excluded from evaluation.
 
 The metrics are also recorded in
-[`public-rule-control-est-budget.csv`](public-rule-control-est-budget.csv) for
-programmatic comparisons. Competition data, extracted Zarr stores, and
+[`results/local_cv/public-rule-control-est-budget.csv`](../../results/local_cv/public-rule-control-est-budget.csv)
+for programmatic comparisons. Competition data, extracted Zarr stores, and
 temporary scorer artifacts are intentionally not tracked.
