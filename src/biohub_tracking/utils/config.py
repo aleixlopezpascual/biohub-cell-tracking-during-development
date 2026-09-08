@@ -79,6 +79,22 @@ class TrainConfig(BaseModel):
     output_dir: str = Field("outputs/train")
 
 
+class RoyerlabConfig(BaseModel):
+    """Parameters for the optional TemporalUNet3D + transformer + ILP baseline."""
+
+    enabled: bool = False
+    heatmap_threshold: float = Field(0.97, ge=0, le=1)
+    peak_min_distance_um: float = Field(3.0, gt=0)
+    use_xy_d4_tta: bool = True
+    edge_strong_threshold: float = Field(0.5, ge=0, le=1)
+    edge_min_threshold: float = Field(0.2, ge=0, le=1)
+    edge_top_k_parents: int = Field(3, ge=1)
+    edge_max_distance_um: float = Field(12.0, gt=0)
+    gap_closing_max_distance_um: float = Field(12.0, gt=0)
+    min_component_nodes: int = Field(3, ge=1)
+    max_nodes: int | None = Field(None, ge=1)
+
+
 class PipelineConfig(BaseModel):
     """Top-level config combining all sub-configs."""
 
@@ -87,6 +103,7 @@ class PipelineConfig(BaseModel):
     tracking: TrackingConfig = Field(default_factory=TrackingConfig)
     metrics: MetricsConfig = Field(default_factory=MetricsConfig)
     train: TrainConfig = Field(default_factory=TrainConfig)
+    royerlab: RoyerlabConfig = Field(default_factory=RoyerlabConfig)
 
 
 def load_config(path: str | Path) -> PipelineConfig:

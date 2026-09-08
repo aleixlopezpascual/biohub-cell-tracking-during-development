@@ -30,6 +30,7 @@ configs/                  YAML configs validated by biohub_tracking.utils.config
 src/biohub_tracking/
   data/                    Lazy OME-Zarr reader (OMEZarrVolume) + 3D patch/frame-pair iteration
   detection/               Dependency-light 3D local-maxima/blob detector
+  baselines/royerlab/      Optional high-ceiling Royerlab-style reusable stages
   models/                  Baseline 3D U-Net (torch-optional interface)
   pipeline/                Model-free detect-and-track baseline composition
   tracking/                TrackingGraph + Hungarian frame-to-frame linker with division branching
@@ -41,6 +42,7 @@ scripts/
   evaluate.py               Compute the official score from predicted/GT submission CSVs
   infer.py                  Detect + track a volume into a submission CSV (requires the torch extra)
   baseline_infer.py         Detect blobs + track a volume without a model (requires the zarr extra)
+  royerlab_infer.py         Preflight the optional TemporalUNet3D + transformer + ILP workflow
 bundle.py                  Zips the pure-Python package for offline Kaggle notebook submission
 tests/                     Focused synthetic tests (no real data required)
 ```
@@ -112,6 +114,31 @@ dataset; `torch`-dependent tests are skipped automatically when the `torch`
 extra isn't installed.
 
 ## Local validation before submission
+
+## Recommended competitive baseline
+
+Use `configs/royerlab_inference.yaml` as the starting point for a competitive
+Kaggle candidate. Its portable stages are independently usable with only NumPy
+and SciPy: physical 3D heatmap peaks, reversible XY D4 TTA, `(t,z,y,x)`
+sinusoidal encodings, center feature sampling, probability/distance-gated
+edge candidates, and bounded gap/component/node-count postprocessing.
+
+The learned `TemporalUNet3D`/`SimpleNodeTransformer` and `tracksdata`/GEFF ILP
+solver are deliberately **not** bundled. Attach compatible offline Kaggle
+weights and wheels, then preflight them:
+
+```bash
+PYTHONPATH=src python3 scripts/royerlab_infer.py \
+  --config configs/royerlab_inference.yaml \
+  --temporal-checkpoint /kaggle/input/support/weights/temporal.pt \
+  --transformer-checkpoint /kaggle/input/support/weights/transformer.pt \
+  --require-ilp
+```
+
+The entry point stops with an actionable dependency/integration error until a
+concrete support-pack model adapter is provided; it never silently substitutes
+an incompatible model or solver. Run the local-evaluation gate below before
+promoting any resulting submission.
 
 Before submitting any candidate to Kaggle, run local evaluation and inspect the component metrics. The recommended protocol is documented in `docs/local_evaluation.md` and follows the community Local CV Pack/prefix-holdout strategy.
 

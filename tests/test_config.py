@@ -11,7 +11,7 @@ from biohub_tracking.utils.config import load_config
 CONFIGS_DIR = Path(__file__).resolve().parent.parent / "configs"
 
 
-@pytest.mark.parametrize("name", ["default.yaml", "train.yaml", "inference.yaml"])
+@pytest.mark.parametrize("name", ["default.yaml", "train.yaml", "inference.yaml", "royerlab_inference.yaml"])
 def test_shipped_configs_are_valid(name: str) -> None:
     config = load_config(CONFIGS_DIR / name)
     assert config.data.zarr_path
