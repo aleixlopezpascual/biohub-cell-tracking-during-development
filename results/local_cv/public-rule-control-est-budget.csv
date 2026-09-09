@@ -1,0 +1,4 @@
+candidate,split,fold_prefix,score,edge_jaccard,division_jaccard,node_recall,node_budget_source,split_source,scorer,data_source
+public-rule-control-est-budget,A,44b6,0.5313966754463341,0.5179759704251387,0.0,0.7253436273123322,cv_pack_est,Biohub Local CV Pack prefix holdout,official Royerlab tracking_cellmot,extracted Kaggle train data
+public-rule-control-est-budget,B,6bba,0.6220321552223572,0.6148127402805713,0.0,0.8130155286874892,cv_pack_est,Biohub Local CV Pack prefix holdout,official Royerlab tracking_cellmot,extracted Kaggle train data
+public-rule-control-est-budget,all,equal_weight,0.5767144153343456,,,,cv_pack_est,Biohub Local CV Pack prefix holdout,official Royerlab tracking_cellmot,extracted Kaggle train data

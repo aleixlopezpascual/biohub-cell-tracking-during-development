@@ -4,6 +4,10 @@ Guidance for GitHub Copilot, Claude, Gemini, Cursor, and any other AI developmen
 
 This file is the single source of truth for assistant behavior. Do not create parallel instruction files with divergent rules; point them here with symlinks.
 
+All repository documentation must live under `docs/`. Use root files only for established project conventions such as `README.md`, `AGENTS.md`, and tool-specific symlinks that point back to this guidance. Machine-readable outputs may live in purpose-specific directories such as `results/`, but any explanatory markdown for those outputs belongs in `docs/`.
+
+Register experiment results consistently: local CV scores go in `results/local_cv/experiments.csv`, Kaggle live/private leaderboard submissions go in `results/kaggle_lb/submissions.csv`, and explanatory writeups for either belong under `docs/`. Keep these files append-only unless fixing a factual error.
+
 ## Project mission
 
 Build a production-ready, research-friendly codebase for the Kaggle **Biohub - Cell Tracking During Development** competition. The task is to detect 3D cell centroids in OME-Zarr microscopy volumes, link them across time, reconstruct cell lineages including mitosis, and export strict Kaggle submission CSVs.
