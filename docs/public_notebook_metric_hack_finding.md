@@ -165,12 +165,62 @@ Submitted via `kaggle competitions submit -c biohub-cell-tracking-during-develop
 (submission id `56120358`). See `results/kaggle_lb/submissions.csv` for the
 scored result.
 
+## Scored result: 0.883, and why it doesn't match the ~0.96 leaderboard
+
+Submission `56120358` scored a **public score of 0.883** — a genuine,
+exploit-free result. This is legitimate, but noticeably below the ~0.95-0.97
+entries currently visible near the top of the public leaderboard. Root
+cause, confirmed from the kernel v3 run log and the attached support-pack
+dataset's own manifest (not from anything we changed):
+
+- The kernel log shows:
+  ```
+  Found 1 checkpoint splits: ['split_0']
+  loaded weight: .../unet_transformer/split_0/edge_predictor_best.pth
+  Ensemble mode: False
+  ```
+  `biohub-v6-ultra-best`'s main advantage over the earlier notebooks in the
+  same family is *multi-checkpoint ensemble inference*, but the public
+  dataset it depends on, `pilkwang/biohub-tracking-support-pack-50ep-v1`
+  (checked via `kaggle datasets files` and its `ARTIFACT_MANIFEST.json`),
+  only ships **one** checkpoint split (`split_0`, 3 weight files, ~33 MB
+  total). With only one split available, the notebook's own ensembling logic
+  has nothing to ensemble over and silently falls back to single-model
+  inference. This is an inherent limitation of the *publicly shared* weights
+  the notebook depends on, not a bug introduced by removing the exploit cell
+  (the promoted `submission.csv` is byte-identical to the notebook's own
+  `submission_clean.csv`, so nothing about the model/inference path was
+  touched).
+- The support pack is explicitly a "50-epoch" snapshot (per its dataset
+  name/README); the author's actual best private checkpoints (more epochs
+  and/or more cross-validation splits) were evidently never published
+  alongside the notebook.
+- **Correction on the "~0.966" reference score**: checking the *current*
+  public leaderboard directly (`kaggle competitions leaderboard --download`)
+  shows the notebook's author, `amanatar` (team "Aman Atar", team id
+  `16458655`), sits at **rank 527 with a live public score of 0.942**, not
+  0.966. The 0.966 score on the leaderboard belongs to a different,
+  unrelated competitor. It's likely an earlier research note conflated the
+  author's score with someone else's, or with a stale/cached score shown in
+  the notebook's own output before the July division-metric patch and
+  leaderboard rescore (which does not retroactively update a notebook's
+  displayed "Best Score" widget).
+
+**Conclusion:** 0.883 is the correct, legitimate score for running the
+*exact* publicly shared code against the *exact* publicly shared weights,
+after removing only the exploit-injection cell. Closing the remaining gap to
+~0.94-0.97 would require either the author's un-shared, more complete
+checkpoint set, or training additional checkpoint splits ourselves to
+restore genuine ensembling — not a code or rules issue.
+
 ## Status
 
 - Private research kernel `aleixlopez/biohub-v6-ultra-best-fork` v3 (cleaned,
   exploit cell removed) is our submitted, legitimate public-notebook-derived
-  entry — see "Resolution" above for the score.
+  entry — scored **public score 0.883** (submission `56120358`), see above.
 - Our other submitted baseline is `public-rule-control-est-budget`
   (kernel `aleixlopez/biohub-public-rule-control-est-budget-submit` v2),
   which scored a genuine **public score 0.251** with no synthetic nodes —
   see `docs/kaggle_submission_kernel.md` and `results/kaggle_lb/submissions.csv`.
+- `biohub-v6-ultra-best-fork` (0.883) is our current best legitimate
+  submission, superseding the 0.251 rule-based baseline.
