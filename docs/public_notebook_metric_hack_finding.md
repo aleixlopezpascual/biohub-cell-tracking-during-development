@@ -213,8 +213,28 @@ after removing only the exploit-injection cell. Closing the remaining gap to
 checkpoint set, or training additional checkpoint splits ourselves to
 restore genuine ensembling — not a code or rules issue.
 
+**Confirmation (2026-09-09, per user report):** the original public notebook
+`amanatar/biohub-v6-ultra-best` itself displays a "Best Score" of **0.882**
+on its Kaggle notebook page — essentially identical (within rounding/
+run-to-run noise) to our reproduction's **0.883**. This is strong external
+confirmation that:
+- Our exploit-cell removal changed nothing about the model's real
+  performance; running the *exact* same publicly shared code/weights as-is
+  reproduces the *exact* same score the original author's own notebook page
+  reports.
+- The earlier "~0.966" figure was never this notebook's actual displayed
+  score. It was likely a mix-up with a different competitor's leaderboard
+  entry, and `amanatar`'s better live submissions (up to 0.942, per the
+  competition leaderboard) come from a separate, more complete/private
+  checkpoint set never bundled into the public `pilkwang` support-pack
+  dataset that this specific published notebook depends on.
+- There is now no unresolved "gap to explain" for *this notebook* — 0.882
+  (original) vs. 0.883 (our clean fork) is the correct, consistent score for
+  the publicly available code + weights combination.
+
 **Clarification: this is not "private competition data", it is incomplete
-shared model weights.** The gap is *not* evidence that top scorers are using
+shared model weights.** The gap between this notebook's ~0.88 score and
+higher leaderboard scores is *not* evidence that top scorers are using
 private ground-truth/test data or anything against the rules — the
 competition data itself (train/test `.zarr` volumes) is identical for every
 participant and openly accessible inside a Kaggle Notebook. What's missing
