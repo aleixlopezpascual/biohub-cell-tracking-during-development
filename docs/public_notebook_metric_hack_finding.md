@@ -30,10 +30,23 @@ def augment_dataset(group):
     ...  # more nodes with t=-999..-985, z=-10000/-10001, x=-10000
 ```
 
-In the run we downloaded, this added **132,846 of 265,328 total submission
-rows** (roughly half the file) as fabricated out-of-bounds nodes/edges,
-structured as synthetic parent→children "division" forks per connected
-component. The notebook family names make the intent explicit:
+In the run we downloaded, this added **184 of 265,328 total submission
+rows** as fabricated out-of-bounds nodes/edges, structured as synthetic
+parent→children "division" forks per connected component.
+
+**Correction (re-checked before resubmission):** an earlier version of this
+document mis-reported this as "132,846 of 265,328 rows (roughly half the
+file)". That figure was wrong — it came from naively filtering `t < 0`,
+which also matches the file's *normal, legitimate* edge rows (edges don't
+carry coordinates, so `t/z/y/x` are set to a harmless `-1` sentinel for
+every edge row by design). Re-filtering on the actual exploit signature
+(`z <= -9000` or `t <= -900`, matching the real injected coordinates like
+`t=-1000, z=-10000`) shows only **184 rows** are the synthetic
+hub/fork/divider nodes and their edges — a small, easily-isolated block at
+the end of the pipeline, not half the file. This does not change the
+conclusion (it is still a deliberate metric exploit and was correctly not
+submitted), only the estimate of its scale. The notebook family names make
+the intent explicit:
 `biohub-metric-hack-last-call`, `improved-metric-hack-last-call`,
 `metric-hack-last-call`. This is designed to exploit the official grader's
 local-window division-matching / connected-component bookkeeping (per
@@ -114,12 +127,50 @@ Any future work adapting ideas from these notebooks must strip the
 `augment_dataset` / `MAX_COMPONENTS` / `FORKS` synthetic-node injection
 entirely before any submission is made.
 
+## Rules check: is reusing a public notebook itself allowed?
+
+Before submitting anything derived from this notebook, we checked whether
+this competition's rules restrict reuse of other participants' public code.
+Kaggle's Foundational Competition Rules (which apply here, category
+"Research", $60,000 prize pool) explicitly **require** that any
+competition-related code shared publicly be shared on Kaggle.com (forums or
+Notebooks), and this competition follows the standard Kaggle norm of
+encouraging public notebook sharing for transparency/collaboration. There is
+no rule against building on or forking a public notebook — that is the
+intended use of "Public" notebooks. The exploit itself was never a
+rules-sanctioned technique; it was a metric implementation bug, publicly
+disclosed and patched (see above). So: **forking/reusing the legitimate
+modeling pipeline is fine; submitting the leftover exploit-injection code is
+not** (and, post-patch, would no longer even help the score).
+
+## Resolution: cleaned submission
+
+We removed the `augment_dataset`/`MAX_COMPONENTS`/`FORKS` cell entirely from
+our fork. It turned out the notebook's own pipeline already writes a fully
+clean, exploit-free intermediate file (`submission_clean.csv`, produced by
+the legitimate "HYBRID POSTPROCESSING" cell) *before* the exploit cell runs.
+We replaced the exploit cell with a no-op that promotes
+`submission_clean.csv` to the required `submission.csv` output, with an
+in-notebook assertion (`0 exploit rows`) guarding against regressions, and
+added an attribution/modification note to the notebook.
+
+Kernel `aleixlopez/biohub-v6-ultra-best-fork` v3 ran successfully on GPU and
+produced a submission with:
+- 259,564 rows (132,482 nodes / 127,082 edges), **0 exploit rows**.
+- No NaNs, no duplicate node ids, no dangling edge references, all
+  coordinates in-bounds (`t` 0-99, `z` 0-63 across all 4 test datasets).
+- Byte-identical to `submission_clean.csv`.
+
+Submitted via `kaggle competitions submit -c biohub-cell-tracking-during-development -k aleixlopez/biohub-v6-ultra-best-fork -v 3 -f submission.csv`
+(submission id `56120358`). See `results/kaggle_lb/submissions.csv` for the
+scored result.
+
 ## Status
 
-- Private research kernel `aleixlopez/biohub-v6-ultra-best-fork` exists on
-  Kaggle (not submitted, harmless) for our own inspection; it should not be
-  used as-is for a real submission.
-- Our real, submitted baseline remains `public-rule-control-est-budget`
+- Private research kernel `aleixlopez/biohub-v6-ultra-best-fork` v3 (cleaned,
+  exploit cell removed) is our submitted, legitimate public-notebook-derived
+  entry — see "Resolution" above for the score.
+- Our other submitted baseline is `public-rule-control-est-budget`
   (kernel `aleixlopez/biohub-public-rule-control-est-budget-submit` v2),
   which scored a genuine **public score 0.251** with no synthetic nodes —
   see `docs/kaggle_submission_kernel.md` and `results/kaggle_lb/submissions.csv`.
