@@ -213,6 +213,23 @@ after removing only the exploit-injection cell. Closing the remaining gap to
 checkpoint set, or training additional checkpoint splits ourselves to
 restore genuine ensembling — not a code or rules issue.
 
+**Clarification: this is not "private competition data", it is incomplete
+shared model weights.** The gap is *not* evidence that top scorers are using
+private ground-truth/test data or anything against the rules — the
+competition data itself (train/test `.zarr` volumes) is identical for every
+participant and openly accessible inside a Kaggle Notebook. What's missing
+is simply that `amanatar` (and presumably other top scorers building on the
+same family of notebooks) trained more model checkpoints locally than they
+chose to publish in the `pilkwang/biohub-tracking-support-pack-50ep-v1`
+dataset — the pack is explicitly named/versioned as a reduced "50-epoch"
+snapshot with a single checkpoint split. Holding back one's best-trained
+weights while still sharing the inference/training *code* publicly is
+normal and permitted Kaggle practice (competitors are not obligated to
+publish their best checkpoints, only their code if they choose to share at
+all). So: no rule violation, no hidden competition data — just an inherent,
+expected reproducibility ceiling when working from partially-shared
+artifacts, closable only by training our own additional checkpoints.
+
 ## Status
 
 - Private research kernel `aleixlopez/biohub-v6-ultra-best-fork` v3 (cleaned,
