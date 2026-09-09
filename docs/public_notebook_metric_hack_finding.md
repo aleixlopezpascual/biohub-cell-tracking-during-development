@@ -48,11 +48,54 @@ notebook, is a competition-integrity violation, not a legitimate modeling
 improvement, and we will not do this regardless of how many public
 leaderboard entries appear to be using the same trick.
 
-This also answers the original question: the `~0.96` scores visible on the
-public leaderboard from teams whose notebooks match this family are very
-likely partly or fully inflated by this exploit, not a reflection of
-real tracking quality. They are not a fair target to chase by copying the
-same trick.
+## Confirmed via official competition discussion: exploit is known and patched
+
+Checked the competition's discussion forum directly
+(`kaggle competitions topics list` / `topic-messages`). This exact exploit
+is a known, publicly acknowledged issue, already patched by the organizers:
+
+- Discussion topic **"Division Metric exploit and patch"**
+  (id `727154`, 2026-07-18): a participant (`thibautgoldsborough`) publicly
+  disclosed the exact mechanism — synthetic "hub" nodes and fork chains far
+  outside the volume (e.g. `z=y=x=-10000`) merge all predicted tracks into
+  one connected component and register as fake divisions, which the
+  *pre-patch* division-Jaccard matcher (based on weak connectivity) scored
+  as true positives, adding close to the full `+0.1` division-Jaccard
+  weight to the final score with zero real tracking benefit.
+- The competition organizers confirmed: *"a few of you might be aware that
+  an exploit of our metrics was found, specifically in the division Jaccard
+  score. We have made a patch and will re-score all submissions... The patch
+  is already public at
+  https://github.com/royerlab/kaggle-cell-tracking-competition."*
+- Discussion topic **"COMPLETED: Rescore Underway"** (id `728324`,
+  2026-07-22/23): organizers announced the metric patch went live and **all
+  submissions were rescored**, with an explicit expectation that "most
+  submissions will have at least a minor drop in score." A participant
+  confirmed their own "hacking score" dropped after the rescore.
+- The patch requires divisions to be genuine **strongly-connected**
+  parent→two-daughter structures matched within the 7 µm radius, so the
+  far-away synthetic forks now register as false positives instead of true
+  positives — the exploit no longer works against the live scorer.
+
+**Conclusion:** this is not a gray area — organizers explicitly identified
+it as a metric bug, patched it, and rescored the whole leaderboard before
+now. Any of the six downloaded public notebooks that still contain the
+`augment_dataset`/`MAX_COMPONENTS`/`FORKS` injection code are stale
+artifacts from before the July 2026 patch; running that code today against
+the live (patched) scorer would just add false-positive division rows and
+very likely *hurt* the score slightly rather than help it, in addition to
+being explicitly against the spirit of the competition. There is no
+indication in the rules or discussion that intentionally exploiting a
+metric bug is condoned — quite the opposite, it was treated as a bug to fix.
+
+This also answers the original question: the `~0.96` scores currently
+visible on the public leaderboard are post-patch/post-rescore scores, so
+they should **not** reflect this specific exploit anymore. The gap between
+our 0.251 baseline and the leaderboard's ~0.96 entries is therefore a
+genuine methodology gap (learned 3D detection + transformer edge scoring +
+ILP graph solving + heavy post-processing vs. our simple rule-based
+detector/linker), not a sign that we're missing a scoring trick we should
+copy.
 
 ## What we keep from this notebook family (legitimately)
 
