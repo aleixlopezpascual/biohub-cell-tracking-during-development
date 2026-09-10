@@ -1,0 +1,50 @@
+tests/test_tracking.py
+  s_0f18e862b549eb::t_b5ef29bba73c34 91-112
+src/biohub_tracking/detection/local_maxima.py
+  s_0f18e862b549eb::t_d0effabd0dc724 29-31,40-43,77-112
+docs/cloud_kfold_training_design.md
+  s_0f18e862b549eb::t_688a37ec66c64f 1-86
+AGENTS.md
+  s_0f18e862b549eb::t_d125f6cc224dbc 63-73
+src/biohub_tracking/tracking/hungarian.py
+  s_0f18e862b549eb::t_efa7ec239a5380 38-39,48-49,81-82,88,93-112,115,119
+scripts/monitor_and_submit.py
+  s_0f18e862b549eb::t_72d6b8355fa467 1-74
+docs/final_selection_strategy.md
+  s_0f18e862b549eb::t_c623567875e165 1-61
+docs/0_883_baseline_review.md
+  s_0f18e862b549eb::t_6ac29cbef1b8d6 1-33
+results/local_cv/experiments.csv
+  s_0f18e862b549eb::t_ea538f83ef764f 3-4
+research/kaggle_baseline_review.md
+  s_0f18e862b549eb::t_d9252fd0f7d5a3 7-8
+scripts/monitor_and_submit_0946.py
+  s_0f18e862b549eb::t_b19ec05c3ad508 7
+  s_0f18e862b549eb::t_dff01326d62d08 1-6,8-74
+results/kaggle_lb/submissions.csv
+  s_0f18e862b549eb::t_7a57b70fccf029 5-6
+docs/0_942_baseline_review.md
+  s_0f18e862b549eb::t_a0e14c40017179 1-77
+scripts/patch_notebook.py
+  s_0f18e862b549eb::t_c8c40e4bda69e3 1-22
+docs/0_946_baseline_review.md
+  s_0f18e862b549eb::t_315756da2070f5 1-54
+tests/test_local_maxima.py
+  s_0f18e862b549eb::t_8a391b203b7631 50-75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "6156ea597d5a6206042a816deea79eae51ae68dd",
+  "prompts": {},
+  "sessions": {
+    "s_0f18e862b549eb": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "faa6ff87-1f1d-4ced-b8dd-2cbe35840368",
+        "model": "gemini-3.5-flash"
+      },
+      "human_author": "Aleix López"
+    }
+  }
+}
