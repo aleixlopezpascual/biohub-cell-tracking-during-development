@@ -88,3 +88,25 @@ def test_hungarian_tracker_track_builds_full_graph_over_frames() -> None:
     tracked = tracker.track(graph)
     assert ("a0", "a1") in tracked.edges
     assert ("a1", "a2") in tracked.edges
+
+
+def test_hungarian_tracker_respects_sister_symmetry_gate() -> None:
+    # Parent is at (0, 0, 0)
+    # Daughter 1 is at (0, 0, 1) -> distance = 1.0 um
+    # Proposed daughter 2 is at (0, 0, 4) -> distance = 4.0 um (Asymmetrical! mean=(1+4)/2 = 2.5, ratio=3/2.5 = 1.2 > 0.6)
+    sources = [_det("p", 0, 0, 0, 0)]
+    targets = [_det("d1", 1, 0, 0, 1), _det("d2", 1, 0, 0, 4)]
+    
+    # Run with gate disabled (both matched)
+    tracker_off = HungarianTracker(
+        TrackerConfig(max_link_distance_um=5.0, division_search_radius_um=5.0, use_sister_symmetry_gate=False)
+    )
+    edges_off = tracker_off.link_frames(sources, targets)
+    assert set(edges_off) == {("p", "d1"), ("p", "d2")}
+
+    # Run with gate enabled (asymmetry prevents second daughter matching)
+    tracker_on = HungarianTracker(
+        TrackerConfig(max_link_distance_um=5.0, division_search_radius_um=5.0, use_sister_symmetry_gate=True, sister_symmetry_tau=0.6)
+    )
+    edges_on = tracker_on.link_frames(sources, targets)
+    assert set(edges_on) == {("p", "d1")}

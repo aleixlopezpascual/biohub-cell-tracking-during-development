@@ -60,16 +60,17 @@ The reviewed Kaggle notebooks are documented in `research/kaggle_baseline_review
 
 ### Strongest public baseline family
 
-The most competitive listed notebooks are the royerlab-style **TemporalUNet3D + SimpleNodeTransformer + tracksdata/ILP + metric-aware postprocessing** variants, especially `amanatar/biohub-v6-ultra-best`.
+The most competitive notebooks belong to the royerlab-style **TemporalUNet3D + SimpleNodeTransformer + tracksdata/ILP + metric-aware postprocessing** family. The absolute highest performing variants are:
 
-They use:
-
-1. Temporal 3D U-Net heatmaps for cell-center detection.
-2. Node feature pooling at detected centroids.
-3. Transformer-based learned edge probabilities.
-4. Candidate edge filtering by probability, top-k parent heuristics, and physical distance gates.
-5. tracksdata/GEFF graph solving with ILP-like weights.
-6. Test-time augmentation, checkpoint ensembling, one-frame gap closing, synthetic midpoint refinement, short-component filtering, and node-count-aware caps.
+1. **`flexonafft/biohub-lineage-forge-precision-tracking` (LB `0.946`):** Focuses on advanced **Edge-Feature Test-Time Augmentation (Edge TTA)** where intermediate 3D U-Net features are flipped/rotated and averaged in canonical space. This creates spatially-invariant node feature embeddings that are extremely robust to spatial distortions.
+2. **`busyaprime/biohub-0-942-lb-one-knob-past-the-public-line` (LB `0.942`):** Implements **Bidirectional Temporal Tracking** (harmonic probability fusion of forward and backward edge predictions), auxiliary **DeepCenter center-prior heatmaps** to veto false division/gap proposals, and loosened separation gates. It also discovered that the optimal detection threshold knob is `0.96` (instead of `0.965`).
+3. **`amanatar/biohub-v6-ultra-best` (LB `0.883` clean / `0.942` original):** The base multi-model ensembling baseline. It uses:
+   - Temporal 3D U-Net heatmaps for cell-center detection.
+   - Node feature pooling at detected centroids.
+   - Transformer-based learned edge probabilities.
+   - Candidate edge filtering by probability, top-k parent heuristics, and physical distance gates.
+   - tracksdata/GEFF graph solving with ILP-like weights.
+   - Test-time augmentation, checkpoint ensembling, one-frame gap closing, synthetic midpoint refinement, short-component filtering, and node-count-aware caps.
 
 ### Compact baseline family
 

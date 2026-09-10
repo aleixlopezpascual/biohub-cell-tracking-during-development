@@ -35,6 +35,8 @@ class TrackerConfig:
     division_search_radius_um: float = 20.0
     max_daughters: int = 2
     gating_time_window: int = 1
+    use_sister_symmetry_gate: bool = False
+    sister_symmetry_tau: float = 0.6
 
     def __post_init__(self) -> None:
         if self.max_link_distance_um <= 0:
@@ -43,6 +45,8 @@ class TrackerConfig:
             raise ValueError("division_search_radius_um must be positive")
         if self.max_daughters < 2:
             raise ValueError("max_daughters must be >= 2 to represent divisions")
+        if self.sister_symmetry_tau <= 0:
+            raise ValueError("sister_symmetry_tau must be positive")
 
 
 class HungarianTracker:
@@ -74,27 +78,45 @@ class HungarianTracker:
         edges: list[tuple[NodeId, NodeId]] = []
         matched_target_cols: set[int] = set()
         out_count: dict[int, int] = defaultdict(int)
+        linked_cols: dict[int, list[int]] = defaultdict(list)
+
         for r, c in zip(row_ind, col_ind):
             if dist[r, c] <= cfg.max_link_distance_um:
                 edges.append((sources[r].id, targets[c].id))
                 matched_target_cols.add(c)
                 out_count[r] += 1
+                linked_cols[r].append(c)
 
         # Division branching: attach unmatched targets as extra daughters.
         unmatched_cols = [c for c in range(len(targets)) if c not in matched_target_cols]
         for c in unmatched_cols:
-            candidate_rows = [
-                r
-                for r in range(len(sources))
-                if out_count[r] >= 1
-                and out_count[r] < cfg.max_daughters
-                and dist[r, c] <= cfg.division_search_radius_um
-            ]
+            candidate_rows = []
+            for r in range(len(sources)):
+                if (
+                    out_count[r] >= 1
+                    and out_count[r] < cfg.max_daughters
+                    and dist[r, c] <= cfg.division_search_radius_um
+                ):
+                    # Sister Symmetry Gate check if enabled
+                    if cfg.use_sister_symmetry_gate and r in linked_cols:
+                        d1_col = linked_cols[r][0]
+                        d1_dist = dist[r, d1_col]
+                        d2_dist = dist[r, c]
+                        mean_dist = (d1_dist + d2_dist) / 2.0
+                        if mean_dist > 0:
+                            symmetry_ratio = abs(d1_dist - d2_dist) / mean_dist
+                            if symmetry_ratio > cfg.sister_symmetry_tau:
+                                continue  # Violates symmetry, filter out this candidate
+
+                    candidate_rows.append(r)
+
             if not candidate_rows:
                 continue
+
             best_r = min(candidate_rows, key=lambda r: dist[r, c])
             edges.append((sources[best_r].id, targets[c].id))
             out_count[best_r] += 1
+            linked_cols[best_r].append(c)
 
         return edges
 

@@ -4,6 +4,8 @@ Reviewed notebooks downloaded with `kaggle kernels pull` on 2026-09-08:
 
 | Notebook | Local file | Family | Main approach |
 |---|---|---|---|
+| `flexonafft/biohub-lineage-forge-precision-tracking` | `research/kaggle_notebooks/flexonafft_biohub-lineage-forge-precision-tracking/` | Peak Edge-Feature TTA / royerlab | Advanced Edge-Feature Test-Time Augmentation on intermediate 3D U-Net representations combined with multi-model feature blending. Scores **0.946** genuinely. |
+| `busyaprime/biohub-0-942-lb-one-knob-past-the-public-line` | `research/kaggle_notebooks/busyaprime_biohub-0-942-lb-one-knob-past-the-public-line/` | Bidirectional Association / royerlab | Forward/backward edge predictions fused via harmonic probability, DeepCenter center-prior vetoes, and loosened physical division gates. Tuned threshold to **0.96** for an LB boost of **0.942**. |
 | `amanatar/improved-metric-hack-last-call` | `research/kaggle_notebooks/amanatar_improved-metric-hack-last-call/` | Metric-hack/royerlab | TemporalUNet3D + node transformer + tracksdata ILP, followed by gap-closing and short-component filtering. |
 | `kaiwalyaatulraut/biohub-solution` | `research/kaggle_notebooks/kaiwalyaatulraut_biohub-solution/` | Compact custom baseline | Small 3D U-Net ensemble on pooled XY volumes, local-maxima detection, Hungarian linking with velocity, optional gap repair/line fitting/short-track filtering. |
 | `kaiwalyaatulraut/biohub-competition-solution` | `research/kaggle_notebooks/kaiwalyaatulraut_biohub-competition-solution/` | Metric-hack/royerlab | Same royerlab TemporalUNet3D+transformer+ILP family, shorter/earlier variant with post-processing. |
