@@ -1,0 +1,26 @@
+scripts/kaggle_kernels/detector_sanity_check/kernel.py
+  s_42e1290e687897::t_bc0c30eccacc1a 10,12-20,24-34,38-39
+  s_42e1290e687897::t_0a860007c6fcd8 11,35-36
+  s_42e1290e687897::t_1ed1e460500a18 1-5,7-9,40-41,43-62
+  s_42e1290e687897::t_54088772dd57ba 6,21-23,37,42
+scripts/kaggle_kernels/detector_sanity_check/kernel-metadata.json
+  s_42e1290e687897::t_2219ce4c4dd8ee 1-18
+scripts/build_gold_training_bundle.py
+  s_42e1290e687897::t_2b5de808cccf9d 18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "b3f594523cbc7577cfe2d96524399214be932661",
+  "prompts": {},
+  "sessions": {
+    "s_42e1290e687897": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "42440c59-0f24-4501-98e6-bd999496a380",
+        "model": "gemini-3.5-flash"
+      },
+      "human_author": "Aleix López"
+    }
+  }
+}
