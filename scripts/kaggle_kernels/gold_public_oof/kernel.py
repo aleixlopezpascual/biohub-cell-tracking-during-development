@@ -90,6 +90,14 @@ if "oof_inference" not in runtime_config:
     runtime_config["oof_inference"] = {}
 runtime_config["oof_inference"]["detection_threshold"] = 0.97
 
+# Dynamically append 50 to evaluation_epochs to pass internal validation
+if "learning_curve" in runtime_config and "evaluation_epochs" in runtime_config["learning_curve"]:
+    if 50 not in runtime_config["learning_curve"]["evaluation_epochs"]:
+        # If it is a tuple, convert to list first
+        epochs_list = list(runtime_config["learning_curve"]["evaluation_epochs"])
+        epochs_list.append(50)
+        runtime_config["learning_curve"]["evaluation_epochs"] = epochs_list
+
 runtime_config_path = Path("/kaggle/working/gold_training_runtime.yaml")
 runtime_config_path.write_text(yaml.safe_dump(runtime_config, sort_keys=False), encoding="utf-8")
 print(f"Wrote runtime config to: {runtime_config_path}")
