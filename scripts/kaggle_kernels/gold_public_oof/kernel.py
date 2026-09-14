@@ -89,6 +89,10 @@ runtime_config_path = Path("/kaggle/working/gold_training_runtime.yaml")
 runtime_config_path.write_text(yaml.safe_dump(runtime_config, sort_keys=False), encoding="utf-8")
 print(f"Wrote runtime config to: {runtime_config_path}")
 
+# Setup environment with PYTHONPATH for subprocesses
+env = os.environ.copy()
+env["PYTHONPATH"] = f"{src_dir}:{scripts_dir}:{env.get('PYTHONPATH', '')}"
+
 # 4. Prepare gold splits
 print("\n" + "=" * 50)
 print("Preparing holdout splits...")
@@ -101,6 +105,7 @@ subprocess.run(
         "--candidate",
         "public-50ep",
     ],
+    env=env,
     check=True,
 )
 print("=" * 50 + "\n")
@@ -134,7 +139,7 @@ for fold_index in [0, 1]:
             "--detection-threshold",
             "0.97",
         ],
-        env={"PYTHONPATH": f"{src_dir}:{os.environ.get('PYTHONPATH', '')}"},
+        env=env,
         check=True,
     )
 
