@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import importlib.util
 import os
 import shutil
 import subprocess
@@ -34,6 +35,42 @@ print("=" * 50)
 # Add the mounted dataset code paths to sys.path
 sys.path.insert(0, str(src_dir))
 sys.path.insert(0, str(scripts_dir))
+
+# 1.5 Install optional dependencies (zarr, geff, tracksdata, etc.) using offline wheels
+required_modules = ("tracksdata", "zarr", "geff", "pyscipopt", "polars")
+if any(importlib.util.find_spec(module) is None for module in required_modules):
+    wheel_dirs = sorted(Path("/kaggle/input").glob("**/wheels"))
+    if not wheel_dirs:
+        raise FileNotFoundError("attach the Royerlab offline dependency wheels")
+    print("=" * 50)
+    print(f"Installing offline dependency wheels from: {wheel_dirs[0]}...")
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            "--quiet",
+            "--no-index",
+            "--find-links",
+            str(wheel_dirs[0]),
+            "tracksdata",
+            "zarr",
+            "pyscipopt",
+            "geff",
+            "ilpy",
+            "polars",
+            "blosc2",
+            "dask",
+            "imagecodecs",
+            "pyarrow",
+            "rustworkx",
+            "sqlalchemy",
+        ],
+        check=True,
+    )
+    print("Dependencies installed successfully.")
+    print("=" * 50)
 
 import torch
 
