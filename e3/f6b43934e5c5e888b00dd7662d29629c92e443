@@ -1,0 +1,23 @@
+scripts/monitor_gold_campaign.py
+  s_42e1290e687897::t_62dce3121733f8 1-67
+scripts/kaggle_kernels/gold_public_oof/kernel.py
+  s_42e1290e687897::t_3809cdaa178ef2 1-144
+scripts/kaggle_kernels/gold_public_oof/kernel-metadata.json
+  s_42e1290e687897::t_efbdd98473770b 1-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "e3f6b43934e5c5e888b00dd7662d29629c92e443",
+  "prompts": {},
+  "sessions": {
+    "s_42e1290e687897": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "42440c59-0f24-4501-98e6-bd999496a380",
+        "model": "gemini-3.5-flash"
+      },
+      "human_author": "Aleix López"
+    }
+  }
+}
