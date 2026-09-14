@@ -1,0 +1,48 @@
+# First gated learning-curve campaign. This deliberately uses one of the two
+# embryo-prefix holdouts; it is not a five-fold launch configuration.
+data_dir: /kaggle/input/competitions/biohub-cell-tracking-during-development/train
+cv_pack_dir: /kaggle/input/biohub-local-cv-pack
+official_source_dir: /kaggle/working/kaggle-cell-tracking-competition
+output_dir: /kaggle/working/outputs/gold_training
+fold: A
+seed: 42
+batch_size: 8  # T4x2-safe for full-resolution UNet features and edge attention
+learning_rate: 0.0001
+num_workers: 4
+window_size: 2  # establish the baseline before a costlier three-frame ablation
+downsample: [1, 4, 4]
+voxel_size_um: [1.625, 0.40625, 0.40625]
+gaussian_sigma_um: [2.0, 1.0, 1.0]
+unet_out_channels: 32
+unet_layers: [32, 64, 128]
+transformer_hidden_dim: 128
+transformer_heads: 4
+transformer_blocks: 4
+transformer_dropout: 0.3
+pool_kernel_um: 5.0
+detection_loss_weight: 1.0
+unlabeled_negative_weight: 0.01
+mixed_precision: false  # enable after the native continuation loop passes an AMP benchmark
+gradient_checkpointing: false
+lr_scheduler: cosine    # applies throughout the native exact-epoch campaign
+checkpoint_every_epochs: 5
+max_nonfinite_gradient_batches_per_epoch: 25
+early_stopping_patience: 2  # official-score evaluation gates, not epochs
+max_runtime_hours: 9.5
+learning_curve:
+  evaluation_epochs: [10, 20, 30, 40]  # measured T4x2 runtime is about one hour/epoch
+  minimum_mean_gain: 0.003
+  maximum_fold_regression: 0.001
+  minimum_ensemble_gain: 0.002
+oof_inference:
+  detection_threshold: 0.99
+  detection_tta: true
+  edge_activation: softmax
+  edge_threshold: 0.5
+  use_ilp: true
+  ilp_edge_weight: -1.0
+  ilp_appearance_weight: 0.1
+  ilp_disappearance_weight: 0.1
+  ilp_division_weight: 1.0
+  max_parents_per_node: null
+  max_children_per_node: null

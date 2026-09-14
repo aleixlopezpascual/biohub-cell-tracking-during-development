@@ -205,7 +205,8 @@ def _sample_to_row(sample: SampleResult, pred: TrackingGraph, gt: TrackingGraph,
     return row
 
 
-def _load_node_estimates(cv_pack_dir: str | Path | None) -> dict[str, int]:
+def load_node_estimates(cv_pack_dir: str | Path | None) -> dict[str, int]:
+    """Load per-volume true-node estimates from the Local CV Pack when present."""
     if cv_pack_dir is None:
         return {}
     path = Path(cv_pack_dir) / "gt_per_volume_stats.csv"
@@ -244,7 +245,7 @@ def score_submission(
     if missing_pred or missing_gt:
         raise ValueError(f"missing datasets: pred={missing_pred}, gt={missing_gt}")
 
-    estimates = dict(_load_node_estimates(cv_pack_dir))
+    estimates = dict(load_node_estimates(cv_pack_dir))
     if node_estimates:
         estimates.update({str(k): int(v) for k, v in node_estimates.items()})
 

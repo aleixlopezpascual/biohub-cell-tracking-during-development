@@ -47,6 +47,8 @@ Outputs:
 - `summary.json`: aggregate score and provenance.
 - `per_dataset.csv`: per-volume metrics and diagnostics.
 - `local_eval_log.csv`: append-only experiment tracker when `--log-experiment` is used.
+- `oracle_summary.json` and `oracle_per_dataset.csv`: optional detection-versus-linking
+  headroom outputs when `--oracle-analysis` is used.
 
 ## Metrics to inspect
 
@@ -70,6 +72,23 @@ The CLI reports:
 - wrong-association edges
 
 Do not promote a candidate based on final score alone. A healthy change should improve the component it targets without worsening node-count ratio, fragmentation, or wrong associations beyond what the score justifies.
+
+For model-training decisions, add `--oracle-analysis`. The detection-constrained
+oracle keeps the candidate's nodes and assigns only GT-consistent edges. The
+gain from the current score to that oracle is linking/postprocessing headroom;
+the remaining gap to perfect GT nodes and links is detection headroom.
+
+Compare a candidate to the frozen baseline with aligned per-volume deltas:
+
+```bash
+PYTHONPATH=src python3 scripts/compare_local_evaluations.py \
+  --baseline outputs/local_eval/baseline/per_dataset.csv \
+  --candidate outputs/local_eval/candidate/per_dataset.csv \
+  --output-dir outputs/local_eval/candidate/paired
+```
+
+The comparison fails if the OOF dataset sets differ and writes win/tie/loss
+counts plus deltas for the official components and failure categories.
 
 ## Community references
 

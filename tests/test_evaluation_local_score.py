@@ -83,6 +83,7 @@ def test_local_eval_cli_writes_artifacts_and_log(tmp_path) -> None:
         "--output-dir",
         str(out),
         "--log-experiment",
+        "--oracle-analysis",
     ]
     completed = subprocess.run(cmd, cwd=".", env={"PYTHONPATH": "src"}, text=True, capture_output=True, check=True)
     assert "unit-test" in completed.stdout
@@ -90,3 +91,5 @@ def test_local_eval_cli_writes_artifacts_and_log(tmp_path) -> None:
     assert summary["score"] == pytest.approx(1.1)
     assert (out / "per_dataset.csv").exists()
     assert pd.read_csv(out / "local_eval_log.csv").iloc[-1]["candidate"] == "unit-test"
+    assert json.loads((out / "oracle_summary.json").read_text())["linking_headroom"] == pytest.approx(0.0)
+    assert (out / "oracle_per_dataset.csv").exists()

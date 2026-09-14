@@ -7,7 +7,13 @@ import argparse
 import json
 from pathlib import Path
 
-from biohub_tracking.evaluation import ExperimentLogEntry, append_experiment_log, load_cv_split_plan, score_submission
+from biohub_tracking.evaluation import (
+    ExperimentLogEntry,
+    analyze_oracle_headroom,
+    append_experiment_log,
+    load_cv_split_plan,
+    score_submission,
+)
 from biohub_tracking.evaluation.experiment_log import current_commit_sha, file_sha256
 
 
@@ -25,6 +31,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--public-lb", type=float, help="Optional public leaderboard score to record.")
     parser.add_argument("--private-lb", type=float, help="Optional private leaderboard score to record.")
     parser.add_argument("--notes", default="", help="Optional experiment notes.")
+    parser.add_argument(
+        "--oracle-analysis",
+        action="store_true",
+        help="Also write detection-vs-linking oracle headroom diagnostics.",
+    )
     return parser.parse_args(argv)
 
 
@@ -66,6 +77,21 @@ def main(argv: list[str] | None = None) -> None:
     summary_path.write_text(json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8")
     result.per_dataset.to_csv(per_dataset_path, index=False)
 
+    if args.oracle_analysis:
+        oracle = analyze_oracle_headroom(
+            args.submission,
+            args.gt_submission,
+            datasets=datasets,
+            cv_pack_dir=args.cv_pack_dir,
+            max_distance=args.max_distance,
+        )
+        oracle_summary_path = args.output_dir / "oracle_summary.json"
+        oracle_per_dataset_path = args.output_dir / "oracle_per_dataset.csv"
+        oracle_summary_path.write_text(
+            json.dumps(oracle.summary, indent=2, sort_keys=True), encoding="utf-8"
+        )
+        oracle.per_dataset.to_csv(oracle_per_dataset_path, index=False)
+
     if args.log_experiment:
         log_path = args.output_dir / "local_eval_log.csv"
         append_experiment_log(
@@ -90,6 +116,9 @@ def main(argv: list[str] | None = None) -> None:
     print(json.dumps(summary, indent=2, sort_keys=True))
     print(f"wrote {summary_path}")
     print(f"wrote {per_dataset_path}")
+    if args.oracle_analysis:
+        print(f"wrote {oracle_summary_path}")
+        print(f"wrote {oracle_per_dataset_path}")
 
 
 if __name__ == "__main__":

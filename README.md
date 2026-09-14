@@ -43,6 +43,14 @@ scripts/
   infer.py                  Detect + track a volume into a submission CSV (requires the torch extra)
   baseline_infer.py         Detect blobs + track a volume without a model (requires the zarr extra)
   royerlab_infer.py         Preflight the optional TemporalUNet3D + transformer + ILP workflow
+  prepare_gold_training.py  Build real prefix folds and a hashed Kaggle training manifest
+  continue_royerlab_training.py Train one Royerlab model to the next gated epoch
+  run_oof_checkpoint.py     Predict and officially score one exact OOF checkpoint
+  run_gold_stage.py         Run one training gate and its OOF evaluation end to end
+  build_gold_training_bundle.py Build the offline Kaggle runner bundle
+  evaluate_training_gates.py Enforce official-score learning-curve and runtime gates
+  compare_local_evaluations.py Write paired per-volume OOF experiment deltas
+  benchmark_inference_runtime.py Rehearse hidden-scale runtime and peak GPU memory
 bundle.py                  Zips the pure-Python package for offline Kaggle notebook submission
 tests/                     Focused synthetic tests (no real data required)
 ```
@@ -155,3 +163,8 @@ PYTHONPATH=src python3 scripts/local_eval.py \
 ```
 
 The command writes `summary.json`, `per_dataset.csv`, and optionally an append-only `local_eval_log.csv` containing commit/config/scorer/split provenance.
+
+Add `--oracle-analysis` to write detection-versus-linking headroom reports.
+The gated Kaggle training workflow is documented in
+`docs/cloud_kfold_training_design.md` and configured by
+`configs/gold_training.yaml`.
