@@ -20,7 +20,7 @@ class LocalMaximaDetectorConfig:
 
     ``min_distance`` is measured in voxels when ``voxel_size_um`` is absent,
     and in microns when it is supplied. ``threshold`` is applied directly to
-    image intensities.
+    image intensities (or DoG map values when use_dog is enabled).
     """
 
     threshold: float = 0.0
@@ -29,6 +29,11 @@ class LocalMaximaDetectorConfig:
     use_subpixel_refinement: bool = False
     refinement_radius_z: int = 1
     refinement_radius_yx: int = 3
+    
+    # Difference of Gaussians (DoG) options
+    use_dog: bool = False
+    dog_sigmas: list[float] | None = None  # physical sigmas in microns
+    dog_ratio: float = 1.6
 
     def __post_init__(self) -> None:
         if self.min_distance <= 0:
@@ -41,6 +46,11 @@ class LocalMaximaDetectorConfig:
             raise ValueError("refinement_radius_z must be non-negative")
         if self.refinement_radius_yx < 0:
             raise ValueError("refinement_radius_yx must be non-negative")
+        if self.dog_sigmas is not None:
+            if not isinstance(self.dog_sigmas, (list, tuple)) or not all(s > 0 for s in self.dog_sigmas):
+                raise ValueError("dog_sigmas must be a list or tuple of positive floats")
+        if self.dog_ratio <= 1.0:
+            raise ValueError("dog_ratio must be greater than 1.0")
 
 
 class LocalMaximaDetector:
@@ -61,13 +71,35 @@ class LocalMaximaDetector:
         if image.ndim != 3:
             raise ValueError(f"LocalMaximaDetector expects a 3D volume, got ndim={image.ndim}")
 
+        if self.config.use_dog:
+            from scipy.ndimage import gaussian_filter
+            sigmas = self.config.dog_sigmas or [1.5, 2.0, 3.0]
+            voxel_size = np.asarray(self.config.voxel_size_um or (1.0, 1.0, 1.0), dtype=float)
+            dog_maps = []
+            for sigma in sigmas:
+                # physical sigma to voxel sigma conversion
+                sigma_vox_small = sigma / voxel_size
+                sigma_vox_large = (sigma * self.config.dog_ratio) / voxel_size
+                
+                blur_small = gaussian_filter(image, sigma=sigma_vox_small)
+                blur_large = gaussian_filter(image, sigma=sigma_vox_large)
+                dog_maps.append(blur_small - blur_large)
+                
+            if len(dog_maps) == 1:
+                response = dog_maps[0]
+            else:
+                response = np.maximum.reduce(dog_maps)
+        else:
+            response = image
+
         candidates = np.argwhere(
-            (image >= self.config.threshold) & (image == maximum_filter(image, size=3))
+            (response >= self.config.threshold) & (response == maximum_filter(response, size=3))
         )
         if not len(candidates):
             return []
 
-        values = image[tuple(candidates.T)]
+        # Sort candidates primarily by response value, resolving ties lexicographically
+        values = response[tuple(candidates.T)]
         order = np.lexsort((candidates[:, 2], candidates[:, 1], candidates[:, 0], -values))
         scale = np.asarray(self.config.voxel_size_um or (1.0, 1.0, 1.0), dtype=float)
         selected: list[np.ndarray] = []

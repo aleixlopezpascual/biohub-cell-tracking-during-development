@@ -2,6 +2,16 @@
 
 Every candidate must be evaluated locally before submission. The public leaderboard is useful feedback, but participants found it can be optimistic or misleading because public test volumes appear to include train-like twins and because sparse ground truth makes single aggregate scores hard to interpret.
 
+## ⚠️ Crucial Validation Pitfalls & Kaggle Secrets
+
+Based on community research and competition-wide analysis:
+
+1. **The "Dummy Test Set" Trap:** The 4 `.zarr` volumes provided in the public test directory of the competition are **dummies copied directly from the train data**. Tuning hyperparameters (like detection threshold or division gates) directly on these 4 dummy volumes causes severe overfitting. Kaggle swaps this directory with the real, hidden test set during submission. Therefore, **our embryo-disjoint local CV (using real embryo-prefix holdouts) is the only source of truth**.
+2. **Linear Track Dominance ($\ge$ 96.6%):** There are 4,435 disjoint tracking trees in the ground truth, but **at most 151 actually branch**. Because division events are so extremely rare, naive validation splits can suffer from high noise: matching or missing a single division can swing the division Jaccard score by over 10% ($>0.10$).
+3. **"The Metric Pays You to Delete Nodes" (FP Node Penalization):** Because of the 7 µm matching threshold, false positive node detections are heavily penalized by the adjusted edge Jaccard. Ranking predicted nodes by confidence and cutting them off via a strict budget (`cap_node_budget`) or pruning isolated short components (`filter_short_components`) yields significant score improvements.
+4. **No Long Steps for Divisions:** The displacement IQR of division events is completely within the normal cell displacement range. The apparent "long steps" are actually **detector localization errors** (up to 7 µm) compounding across the edge.
+5. **The Mid-Volume "New Track" Gotcha:** Tracks starting mid-volume are almost always **broken continuations** (where the detector endpoint was off and the linker refused them) rather than missed daughters or new tracks. Linking them as forks to "recover divisions" creates massive false divisions and destroys scores.
+
 ## Recommended protocol
 
 1. Generate a candidate `submission.csv`.

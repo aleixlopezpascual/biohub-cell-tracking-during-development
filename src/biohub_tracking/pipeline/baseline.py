@@ -20,6 +20,9 @@ class BaselinePipelineConfig:
     channel: int = 0
     voxel_size_um: tuple[float, float, float] | None = None
     tracker: TrackerConfig = TrackerConfig()
+    use_dog: bool = False
+    dog_sigmas: list[float] | None = None
+    dog_ratio: float = 1.6
 
 
 def infer_volume(volume: OMEZarrVolume, config: BaselinePipelineConfig | None = None) -> TrackingGraph:
@@ -39,6 +42,9 @@ def infer_volume(volume: OMEZarrVolume, config: BaselinePipelineConfig | None = 
             threshold=cfg.threshold,
             min_distance=cfg.min_distance,
             voxel_size_um=voxel_size,
+            use_dog=cfg.use_dog,
+            dog_sigmas=cfg.dog_sigmas,
+            dog_ratio=cfg.dog_ratio,
         )
     )
     graph = TrackingGraph()

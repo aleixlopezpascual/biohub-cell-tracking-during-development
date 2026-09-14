@@ -73,3 +73,41 @@ def test_local_maxima_supports_subpixel_refinement() -> None:
     assert py == 4.0
     assert px > 4.0  # Pulled towards the right
     assert px < 5.0  # But still closer to the peak
+
+
+def test_difference_of_gaussians_config_validation() -> None:
+    # Rejects invalid dog_sigmas
+    with pytest.raises(ValueError, match="dog_sigmas"):
+        LocalMaximaDetectorConfig(use_dog=True, dog_sigmas=[-1.0, 2.0])
+    with pytest.raises(ValueError, match="dog_sigmas"):
+        LocalMaximaDetectorConfig(use_dog=True, dog_sigmas="invalid")
+
+    # Rejects invalid dog_ratio
+    with pytest.raises(ValueError, match="dog_ratio"):
+        LocalMaximaDetectorConfig(use_dog=True, dog_ratio=0.9)
+
+
+def test_detects_blobs_with_difference_of_gaussians() -> None:
+    # Create a smooth Gaussian blob on a zero background.
+    # Difference of Gaussians should easily identify the center.
+    image = np.zeros((15, 15, 15), dtype=float)
+    # Put a Gaussian shape at center (7, 7, 7)
+    for z in range(15):
+        for y in range(15):
+            for x in range(15):
+                dist_sq = (z - 7.0)**2 + (y - 7.0)**2 + (x - 7.0)**2
+                image[z, y, x] = np.exp(-dist_sq / 8.0) * 10.0  # sigma = 2
+
+    # DoG should successfully detect the peak at (7.0, 7.0, 7.0)
+    detector = LocalMaximaDetector(
+        LocalMaximaDetectorConfig(
+            use_dog=True,
+            dog_sigmas=[1.5, 2.0],
+            threshold=0.1,
+            min_distance=2.0,
+        )
+    )
+    peaks = detector.detect(image)
+    assert len(peaks) == 1
+    assert peaks[0] == (7.0, 7.0, 7.0)
+
