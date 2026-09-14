@@ -37,7 +37,7 @@ sys.path.insert(0, str(scripts_dir))
 
 import torch
 
-# 2. Locate CV Pack, Competition train data, and Support pack weights
+# 2. Locate CV Pack, Competition train data, Support pack weights, and Official Source Repository
 cv_packs = sorted(Path("/kaggle/input").glob("**/folds_prefix_holdout.csv"))
 if len(cv_packs) != 1:
     raise FileNotFoundError("Could not uniquely locate dariushafshar/biohub-local-cv-pack")
@@ -56,13 +56,18 @@ support_packs = sorted(Path("/kaggle/input").glob("**/weights/unet_transformer/s
 if len(support_packs) != 1:
     raise FileNotFoundError("Could not uniquely locate pilkwang/biohub-tracking-support-pack-50ep-v1 weights")
 public_weights = support_packs[0]
-official_source_dir = public_weights.parent.parent.parent.parent
+
+# Dynamically locate the official train_unet_transformer.py script in mounted datasets
+official_scripts = sorted(Path("/kaggle/input").glob("**/scripts/train_unet_transformer.py"))
+if not official_scripts:
+    raise FileNotFoundError("Could not find train_unet_transformer.py in /kaggle/input")
+official_source_dir = official_scripts[0].parent.parent
 
 print("=" * 50)
 print(f"CV Pack: {cv_pack_dir}")
 print(f"Train Data: {train_dir}")
 print(f"Public Weights: {public_weights}")
-print(f"Official Source: {official_source_dir}")
+print(f"Official Source Repository: {official_source_dir}")
 print("=" * 50)
 
 # 3. Build Gold runtime configuration
