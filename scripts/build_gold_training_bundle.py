@@ -15,6 +15,7 @@ RUNNER_SCRIPTS = (
     "evaluate_training_gates.py",
     "kaggle_resume_preflight.py",
     "kaggle_threshold_recovery.py",
+    "overfit_detector_sanity.py",
     "prepare_gold_training.py",
     "probe_detection_thresholds.py",
     "run_gold_stage.py",
