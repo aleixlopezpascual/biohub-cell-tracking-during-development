@@ -1,0 +1,19 @@
+scripts/kaggle_kernels/gold_public_oof/kernel.py
+  s_42e1290e687897::t_2073befea677e6 92-95,108,142
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "4cf83e8aece1e6b417c01193ba461b91d7b26823",
+  "prompts": {},
+  "sessions": {
+    "s_42e1290e687897": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "42440c59-0f24-4501-98e6-bd999496a380",
+        "model": "gemini-3.5-flash"
+      },
+      "human_author": "Aleix López"
+    }
+  }
+}
