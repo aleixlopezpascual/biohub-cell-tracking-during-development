@@ -38,17 +38,21 @@ class NativePredictor:
         return np.mean(all_heatmaps, axis=0), np.mean(all_features, axis=0)
 
     def predict_bidirectional_edges(self, src_features: np.ndarray, tgt_features: np.ndarray) -> np.ndarray:
+        """Predict and fuse temporal bidirectional edge probabilities, ensembled across all loaded scorers."""
         if not self.edge_scorers:
             raise ValueError("No edge scorers loaded")
-        model = self.edge_scorers[0]
-        
-        # Predict forward probabilities (u -> v)
-        p_forward = model.predict_edge_logits(src_features, tgt_features)
-        
-        # Predict reverse probabilities (v -> u)
-        p_reverse = model.predict_edge_logits(tgt_features, src_features)
-        p_reverse_aligned = p_reverse.T
-        
-        # Fuse using existing harmonic block
-        return fuse_bidirectional_probabilities(p_forward, p_reverse_aligned, mode="harmonic")
+            
+        all_fused = []
+        for model in self.edge_scorers:
+            # Predict forward probabilities (u -> v)
+            p_forward = model.predict_edge_logits(src_features, tgt_features)
+            
+            # Predict reverse probabilities (v -> u)
+            p_reverse = model.predict_edge_logits(tgt_features, src_features)
+            p_reverse_aligned = p_reverse.T
+            
+            # Fuse using existing harmonic block
+            all_fused.append(fuse_bidirectional_probabilities(p_forward, p_reverse_aligned, mode="harmonic"))
+            
+        return np.mean(all_fused, axis=0)
 
