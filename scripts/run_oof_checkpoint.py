@@ -83,9 +83,14 @@ class OverlayPredictorWrapper:
         self.use_tta = use_tta
         self.use_bidirectional = use_bidirectional
 
-    def predict_heatmaps_and_features(self, frames: Any) -> tuple[Any, Any]:
+    def __getattr__(self, name: str) -> Any:
+        # Fallback to the underlying model for all unhandled attributes/methods (like training, state_dict, etc.)
+        return getattr(self.model, name)
+
+    def encode(self, frames: Any) -> tuple[Any, Any]:
+        """Intercept the U-Net forward encoder pass to apply Feature-Level TTA in canonical space."""
         if not self.use_tta:
-            return self.model.predict_heatmaps_and_features(frames)
+            return self.model.encode(frames)
             
         from biohub_tracking.baselines.royerlab.tta import XY_D4_TRANSFORMS, apply_spatial_transform, invert_spatial_transform
         import numpy as np
@@ -94,13 +99,20 @@ class OverlayPredictorWrapper:
         features = []
         for transform in XY_D4_TRANSFORMS:
             aug_frames = apply_spatial_transform(frames, transform)
-            h, f = self.model.predict_heatmaps_and_features(aug_frames)
-            heatmaps.append(invert_spatial_transform(h, transform))
-            features.append(invert_spatial_transform(f, transform))
+            # Call encode on the underlying model
+            f_aug, h_aug = self.model.encode(aug_frames)
+            heatmaps.append(invert_spatial_transform(h_aug, transform))
+            features.append(invert_spatial_transform(f_aug, transform))
             
-        return np.mean(heatmaps, axis=0), np.mean(features, axis=0)
+        return np.mean(features, axis=0), np.mean(heatmaps, axis=0)
+
+    def predict_heatmaps_and_features(self, frames: Any) -> tuple[Any, Any]:
+        """Direct alias in case the codebase protocol name is called."""
+        f, h = self.encode(frames)
+        return h, f
 
     def predict_edge_logits(self, src_features: Any, tgt_features: Any) -> Any:
+        """Intercept the edge model pass to apply Bidirectional Tracking probability fusion."""
         if not self.use_bidirectional:
             return self.model.predict_edge_logits(src_features, tgt_features)
             
