@@ -44,6 +44,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Keep already completed GEFF predictions and finish missing datasets.",
     )
     parser.add_argument(
+        "--use-overlay",
+        action="store_true",
+        help="Enable advanced inference overlays (Edge-Feature TTA and Bidirectional Tracking).",
+    )
+    parser.add_argument(
         "--score-only",
         action="store_true",
         help="Skip GPU inference and score an already complete output directory.",
@@ -68,6 +73,49 @@ def _json_value(value: Any) -> Any:
     if hasattr(value, "item"):
         return value.item()
     return value
+
+
+class OverlayPredictorWrapper:
+    """Wraps any loaded model instance to run Feature-Level TTA and Bidirectional Tracking."""
+
+    def __init__(self, model: Any, use_tta: bool = True, use_bidirectional: bool = True) -> None:
+        self.model = model
+        self.use_tta = use_tta
+        self.use_bidirectional = use_bidirectional
+
+    def predict_heatmaps_and_features(self, frames: Any) -> tuple[Any, Any]:
+        if not self.use_tta:
+            return self.model.predict_heatmaps_and_features(frames)
+            
+        from biohub_tracking.baselines.royerlab.tta import XY_D4_TRANSFORMS, apply_spatial_transform, invert_spatial_transform
+        import numpy as np
+        
+        heatmaps = []
+        features = []
+        for transform in XY_D4_TRANSFORMS:
+            aug_frames = apply_spatial_transform(frames, transform)
+            h, f = self.model.predict_heatmaps_and_features(aug_frames)
+            heatmaps.append(invert_spatial_transform(h, transform))
+            features.append(invert_spatial_transform(f, transform))
+            
+        return np.mean(heatmaps, axis=0), np.mean(features, axis=0)
+
+    def predict_edge_logits(self, src_features: Any, tgt_features: Any) -> Any:
+        if not self.use_bidirectional:
+            return self.model.predict_edge_logits(src_features, tgt_features)
+            
+        from biohub_tracking.baselines.royerlab.linking import fuse_bidirectional_probabilities
+        import numpy as np
+        
+        # Predict forward probabilities
+        p_forward = self.model.predict_edge_logits(src_features, tgt_features)
+        
+        # Predict reverse probabilities
+        p_reverse = self.model.predict_edge_logits(tgt_features, src_features)
+        p_reverse_aligned = p_reverse.T
+        
+        # Fuse using existing harmonic block
+        return fuse_bidirectional_probabilities(p_forward, p_reverse_aligned, mode="harmonic")
 
 
 def _load_model(predictor: Any, config: Any, weights: Path, device: Any) -> Any:
@@ -354,6 +402,9 @@ def main(argv: list[str] | None = None) -> None:
         )
         device = torch.device(args.device or ("cuda" if torch.cuda.is_available() else "cpu"))
         model = _load_model(predictor, config, args.weights, device)
+        if args.use_overlay:
+            print("Applying Advanced Inference Overlays wrapper (Edge-Feature TTA + Bidirectional Tracking)...", flush=True)
+            model = OverlayPredictorWrapper(model, use_tta=True, use_bidirectional=True)
         predict_config = _predict_config(
             predictor,
             config,

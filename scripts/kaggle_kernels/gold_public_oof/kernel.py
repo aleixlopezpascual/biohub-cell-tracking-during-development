@@ -133,10 +133,10 @@ for fold_index, fold_name in enumerate(["A", "B"]):
             "fold": fold_name,  # Bind the correct fold name (A or B)
         }
     )
-    # Override default threshold to optimal 0.97 for the public model
+    # Override default threshold to optimal 0.96 for the public model with overlays
     if "oof_inference" not in runtime_config:
         runtime_config["oof_inference"] = {}
-    runtime_config["oof_inference"]["detection_threshold"] = 0.97
+    runtime_config["oof_inference"]["detection_threshold"] = 0.96
 
     # Dynamically append 50 to evaluation_epochs to pass internal validation
     if "learning_curve" in runtime_config and "evaluation_epochs" in runtime_config["learning_curve"]:
@@ -158,7 +158,7 @@ for fold_index, fold_name in enumerate(["A", "B"]):
             "--config",
             str(runtime_config_path),
             "--candidate",
-            "public-50ep",
+            "public-50ep-overlays",
         ],
         env=env,
         check=True,
@@ -169,7 +169,7 @@ for fold_index, fold_name in enumerate(["A", "B"]):
         raise FileNotFoundError(f"splits JSON was not generated at: {splits_json}")
 
     # 3.3 Run OOF evaluation
-    print(f"Running OOF Evaluation for Fold {fold_index} using optimal threshold 0.97...")
+    print(f"Running OOF Evaluation for Fold {fold_index} using optimal threshold 0.96 and advanced overlays...")
     subprocess.run(
         [
             sys.executable,
@@ -181,13 +181,14 @@ for fold_index, fold_name in enumerate(["A", "B"]):
             "--fold-index",
             str(fold_index),
             "--candidate",
-            "public-50ep",
+            "public-50ep-overlays",
             "--epoch",
             "50",
             "--weights",
             str(public_weights),
             "--detection-threshold",
-            "0.97",
+            "0.96",
+            "--use-overlay",
         ],
         env=env,
         check=True,
