@@ -1,0 +1,22 @@
+tests/test_royerlab_prediction.py
+  s_42e1290e687897::t_10a30d79793b71 1-23
+src/biohub_tracking/baselines/royerlab/prediction.py
+  s_42e1290e687897::t_1c34029d09ebb9 1-3,5-11,14-32
+  s_42e1290e687897::t_f33ba8558305ff 4,12-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "da7c49feb1d16955deb93329ec3c008dd69e66de",
+  "prompts": {},
+  "sessions": {
+    "s_42e1290e687897": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "42440c59-0f24-4501-98e6-bd999496a380",
+        "model": "gemini-3.5-flash"
+      },
+      "human_author": "Aleix López"
+    }
+  }
+}
