@@ -107,69 +107,69 @@ print(f"Public Weights: {public_weights}")
 print(f"Official Source Repository: {official_source_dir}")
 print("=" * 50)
 
-# 3. Build Gold runtime configuration
-source_config = dataset_root / "configs" / "gold_training.yaml"
-runtime_config = yaml.safe_load(source_config.read_text(encoding="utf-8"))
-
-output_dir = Path("/kaggle/working/outputs/gold_training")
-output_dir.mkdir(parents=True, exist_ok=True)
-
-runtime_config.update(
-    {
-        "data_dir": str(train_dir),
-        "cv_pack_dir": str(cv_pack_dir),
-        "official_source_dir": str(official_source_dir),
-        "output_dir": str(output_dir),
-    }
-)
-# Override the default 0.99 threshold to the optimal 0.97 for the public model
-if "oof_inference" not in runtime_config:
-    runtime_config["oof_inference"] = {}
-runtime_config["oof_inference"]["detection_threshold"] = 0.97
-
-# Dynamically append 50 to evaluation_epochs to pass internal validation
-if "learning_curve" in runtime_config and "evaluation_epochs" in runtime_config["learning_curve"]:
-    if 50 not in runtime_config["learning_curve"]["evaluation_epochs"]:
-        # If it is a tuple, convert to list first
-        epochs_list = list(runtime_config["learning_curve"]["evaluation_epochs"])
-        epochs_list.append(50)
-        runtime_config["learning_curve"]["evaluation_epochs"] = epochs_list
-
-runtime_config_path = Path("/kaggle/working/gold_training_runtime.yaml")
-runtime_config_path.write_text(yaml.safe_dump(runtime_config, sort_keys=False), encoding="utf-8")
-print(f"Wrote runtime config to: {runtime_config_path}")
-
 # Setup environment with PYTHONPATH for subprocesses
 env = os.environ.copy()
 env["PYTHONPATH"] = f"{src_dir}:{scripts_dir}:{env.get('PYTHONPATH', '')}"
 
-# 4. Prepare gold splits
-print("\n" + "=" * 50)
-print("Preparing holdout splits...")
-subprocess.run(
-    [
-        sys.executable,
-        str(scripts_dir / "prepare_gold_training.py"),
-        "--config",
-        str(runtime_config_path),
-        "--candidate",
-        "public-50ep",
-    ],
-    env=env,
-    check=True,
-)
-print("=" * 50 + "\n")
+output_dir = Path("/kaggle/working/outputs/gold_training")
+output_dir.mkdir(parents=True, exist_ok=True)
 
-splits_json = output_dir / "prefix_holdout_splits.json"
-if not splits_json.is_file():
-    raise FileNotFoundError(f"splits JSON was not generated at: {splits_json}")
-
-# 5. Run OOF evaluations on both split_0 and split_1
-for fold_index in [0, 1]:
-    print("=" * 50)
-    print(f"Running OOF Evaluation for Fold {fold_index} using optimal threshold 0.97...")
+# 3. Iterate through Fold 0 (Holdout A) and Fold 1 (Holdout B)
+for fold_index, fold_name in enumerate(["A", "B"]):
+    print("\n" + "=" * 50)
+    print(f"🔄 EVALUATING FOLD {fold_index} (Holdout {fold_name})")
     print("=" * 50)
     
+    # 3.1 Build Gold runtime configuration with the matching fold
+    source_config = dataset_root / "configs" / "gold_training.yaml"
+    runtime_config = yaml.safe_load(source_config.read_text(encoding="utf-8"))
+
+    runtime_config.update(
+        {
+            "data_dir": str(train_dir),
+            "cv_pack_dir": str(cv_pack_dir),
+            "official_source_dir": str(official_source_dir),
+            "output_dir": str(output_dir),
+            "fold": fold_name,  # Bind the correct fold name (A or B)
+        }
+    )
+    # Override default threshold to optimal 0.97 for the public model
+    if "oof_inference" not in runtime_config:
+        runtime_config["oof_inference"] = {}
+    runtime_config["oof_inference"]["detection_threshold"] = 0.97
+
+    # Dynamically append 50 to evaluation_epochs to pass internal validation
+    if "learning_curve" in runtime_config and "evaluation_epochs" in runtime_config["learning_curve"]:
+        if 50 not in runtime_config["learning_curve"]["evaluation_epochs"]:
+            epochs_list = list(runtime_config["learning_curve"]["evaluation_epochs"])
+            epochs_list.append(50)
+            runtime_config["learning_curve"]["evaluation_epochs"] = epochs_list
+
+    runtime_config_path = Path(f"/kaggle/working/gold_training_runtime_{fold_name}.yaml")
+    runtime_config_path.write_text(yaml.safe_dump(runtime_config, sort_keys=False), encoding="utf-8")
+    print(f"Wrote runtime config to: {runtime_config_path}")
+
+    # 3.2 Prepare gold splits matching this fold
+    print(f"Preparing holdout splits for Fold {fold_name}...")
+    subprocess.run(
+        [
+            sys.executable,
+            str(scripts_dir / "prepare_gold_training.py"),
+            "--config",
+            str(runtime_config_path),
+            "--candidate",
+            "public-50ep",
+        ],
+        env=env,
+        check=True,
+    )
+
+    splits_json = output_dir / "prefix_holdout_splits.json"
+    if not splits_json.is_file():
+        raise FileNotFoundError(f"splits JSON was not generated at: {splits_json}")
+
+    # 3.3 Run OOF evaluation
+    print(f"Running OOF Evaluation for Fold {fold_index} using optimal threshold 0.97...")
     subprocess.run(
         [
             sys.executable,
@@ -194,6 +194,6 @@ for fold_index in [0, 1]:
     )
 
 print("\n" + "=" * 50)
-print("🎉 PUBLIC MODEL OOF REFERENCE COMPLETED!")
+print("🎉 PUBLIC MODEL OOF REFERENCE COMPLETED FOR BOTH HOLDOUTS!")
 print(f"Holdout results are saved under {output_dir / 'oof'}")
 print("=" * 50)
