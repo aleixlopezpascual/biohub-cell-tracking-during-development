@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 import numpy as np
 from biohub_tracking.baselines.royerlab.tta import XY_D4_TRANSFORMS, apply_spatial_transform, invert_spatial_transform
+from biohub_tracking.baselines.royerlab.linking import fuse_bidirectional_probabilities
 
 class NativePredictor:
     def __init__(self, detector_weights: list[Path], edge_weights: list[Path]) -> None:
@@ -30,3 +31,19 @@ class NativePredictor:
             features.append(invert_spatial_transform(f, transform))
             
         return np.mean(heatmaps, axis=0), np.mean(features, axis=0)
+
+    def predict_bidirectional_edges(self, src_features: np.ndarray, tgt_features: np.ndarray) -> np.ndarray:
+        if not self.edge_scorers:
+            raise ValueError("No edge scorers loaded")
+        model = self.edge_scorers[0]
+        
+        # Predict forward probabilities (u -> v)
+        p_forward = model.predict_edge_logits(src_features, tgt_features)
+        
+        # Predict reverse probabilities (v -> u)
+        p_reverse = model.predict_edge_logits(tgt_features, src_features)
+        p_reverse_aligned = p_reverse.T
+        
+        # Fuse using existing harmonic block
+        return fuse_bidirectional_probabilities(p_forward, p_reverse_aligned, mode="harmonic")
+
