@@ -52,3 +52,22 @@ def test_bidirectional_harmonic_veto() -> None:
     probs_pass = predictor.predict_bidirectional_edges(src_feats, tgt_feats)
     assert probs_pass[0, 0] > 0.90
 
+
+def test_ensemble_logits_averaging() -> None:
+    class MockModelA:
+        def predict_heatmaps_and_features(self, frames):
+            return frames * 2.0, frames
+            
+    class MockModelB:
+        def predict_heatmaps_and_features(self, frames):
+            return frames * 4.0, frames
+
+    predictor = NativePredictor(detector_weights=[], edge_weights=[])
+    predictor.detectors = [MockModelA(), MockModelB()]
+    
+    image = np.ones((1, 1, 4, 8, 8), dtype=float)
+    # Average across models A (weight 2.0) and B (weight 4.0) should be 3.0
+    mean_heatmap, _ = predictor.predict_heatmaps_and_features(image, use_tta=False)
+    assert np.allclose(mean_heatmap, 3.0)
+
+

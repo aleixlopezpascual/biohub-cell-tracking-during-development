@@ -16,21 +16,26 @@ class NativePredictor:
     def predict_heatmaps_and_features(self, frames: np.ndarray, use_tta: bool = True) -> tuple[np.ndarray, np.ndarray]:
         if not self.detectors:
             raise ValueError("No detectors loaded")
-        model = self.detectors[0]
-        if not use_tta:
-            return model.predict_heatmaps_and_features(frames)
             
-        heatmaps = []
-        features = []
-        for transform in XY_D4_TRANSFORMS:
-            # Apply transform to spatial axes (last two axes Y, X)
-            aug_frames = apply_spatial_transform(frames, transform)
-            h, f = model.predict_heatmaps_and_features(aug_frames)
-            # Invert transform
-            heatmaps.append(invert_spatial_transform(h, transform))
-            features.append(invert_spatial_transform(f, transform))
-            
-        return np.mean(heatmaps, axis=0), np.mean(features, axis=0)
+        all_heatmaps = []
+        all_features = []
+        
+        for model in self.detectors:
+            if not use_tta:
+                h, f = model.predict_heatmaps_and_features(frames)
+                all_heatmaps.append(h)
+                all_features.append(f)
+                continue
+                
+            for transform in XY_D4_TRANSFORMS:
+                # Apply transform to spatial axes (last two axes Y, X)
+                aug_frames = apply_spatial_transform(frames, transform)
+                h, f = model.predict_heatmaps_and_features(aug_frames)
+                # Invert transform
+                all_heatmaps.append(invert_spatial_transform(h, transform))
+                all_features.append(invert_spatial_transform(f, transform))
+                
+        return np.mean(all_heatmaps, axis=0), np.mean(all_features, axis=0)
 
     def predict_bidirectional_edges(self, src_features: np.ndarray, tgt_features: np.ndarray) -> np.ndarray:
         if not self.edge_scorers:
