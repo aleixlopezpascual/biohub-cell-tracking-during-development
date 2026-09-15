@@ -1,0 +1,23 @@
+scripts/kaggle_kernels/gold_public_oof/kernel.py
+  s_42e1290e687897::t_533572c33a027f 136,139,161,172,184,190-191
+scripts/run_oof_checkpoint.py
+  s_42e1290e687897::t_bf3200725f2558 47-50
+  s_42e1290e687897::t_10a34d46036740 405-407
+  s_42e1290e687897::t_fad479c78abd30 78-120
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "3d9971ab88e2a4ec2e5482f8e6061b4f303abeb6",
+  "prompts": {},
+  "sessions": {
+    "s_42e1290e687897": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "42440c59-0f24-4501-98e6-bd999496a380",
+        "model": "gemini-3.5-flash"
+      },
+      "human_author": "Aleix López"
+    }
+  }
+}
