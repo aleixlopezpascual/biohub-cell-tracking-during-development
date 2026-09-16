@@ -1,0 +1,19 @@
+scripts/run_oof_checkpoint.py
+  s_42e1290e687897::t_709648a4cafc34 102-131,137-138,141-143,145-147
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "9acfc3246232d26a6c8ba4a44d7bb7c4a4fb6902",
+  "prompts": {},
+  "sessions": {
+    "s_42e1290e687897": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "42440c59-0f24-4501-98e6-bd999496a380",
+        "model": "gemini-3.5-flash"
+      },
+      "human_author": "Aleix López"
+    }
+  }
+}
