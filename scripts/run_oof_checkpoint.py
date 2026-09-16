@@ -89,22 +89,55 @@ class OverlayPredictorWrapper:
 
     def encode(self, frames: Any) -> tuple[Any, Any]:
         """Intercept the U-Net forward encoder pass to apply Feature-Level TTA in canonical space."""
+        import torch
+        
         if not self.use_tta:
             return self.model.encode(frames)
             
-        from biohub_tracking.baselines.royerlab.tta import XY_D4_TRANSFORMS, apply_spatial_transform, invert_spatial_transform
-        import numpy as np
+        from biohub_tracking.baselines.royerlab.tta import XY_D4_TRANSFORMS
+        
+        # Determine if input is a PyTorch Tensor or NumPy Array
+        is_tensor = isinstance(frames, torch.Tensor)
         
         heatmaps = []
         features = []
-        for transform in XY_D4_TRANSFORMS:
-            aug_frames = apply_spatial_transform(frames, transform)
-            # Call encode on the underlying model
-            f_aug, h_aug = self.model.encode(aug_frames)
-            heatmaps.append(invert_spatial_transform(h_aug, transform))
-            features.append(invert_spatial_transform(f_aug, transform))
+        
+        if is_tensor:
+            for transform in XY_D4_TRANSFORMS:
+                # Apply TTA natively on PyTorch GPU Tensor
+                aug_frames = torch.rot90(frames, k=transform.rotations_ccw, dims=(-2, -1))
+                if transform.flip_x:
+                    aug_frames = torch.flip(aug_frames, dims=(-1,))
+                    
+                f_aug, h_aug = self.model.encode(aug_frames)
+                
+                # Invert TTA natively on PyTorch GPU Tensor
+                h_inv = torch.flip(h_aug, dims=(-1,)) if transform.flip_x else h_aug
+                h_inv = torch.rot90(h_inv, k=-transform.rotations_ccw, dims=(-2, -1))
+                
+                f_inv = torch.flip(f_aug, dims=(-1,)) if transform.flip_x else f_aug
+                f_inv = torch.rot90(f_inv, k=-transform.rotations_ccw, dims=(-2, -1))
+                
+                heatmaps.append(h_inv)
+                features.append(f_inv)
+                
+            # Average across the 8 stacked TTA views on GPU
+            mean_features = torch.stack(features, dim=0).mean(dim=0)
+            mean_heatmaps = torch.stack(heatmaps, dim=0).mean(dim=0)
+            return mean_features, mean_heatmaps
             
-        return np.mean(features, axis=0), np.mean(heatmaps, axis=0)
+        else:
+            # Fallback for NumPy arrays (e.g. CPU fallback)
+            from biohub_tracking.baselines.royerlab.tta import apply_spatial_transform, invert_spatial_transform
+            import numpy as np
+            
+            for transform in XY_D4_TRANSFORMS:
+                aug_frames = apply_spatial_transform(frames, transform)
+                f_aug, h_aug = self.model.encode(aug_frames)
+                heatmaps.append(invert_spatial_transform(h_aug, transform))
+                features.append(invert_spatial_transform(f_aug, transform))
+                
+            return np.mean(features, axis=0), np.mean(heatmaps, axis=0)
 
     def predict_heatmaps_and_features(self, frames: Any) -> tuple[Any, Any]:
         """Direct alias in case the codebase protocol name is called."""
