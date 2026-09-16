@@ -99,31 +99,52 @@ class OverlayPredictorWrapper:
         # Determine if input is a PyTorch Tensor or NumPy Array
         is_tensor = isinstance(frames, torch.Tensor)
         
+        # Helper functions to recursively apply/invert spatial transforms on nested lists/tuples of Tensors
+        def apply_torch_transform(item: Any, transform: Any) -> Any:
+            if isinstance(item, (list, tuple)):
+                return type(item)(apply_torch_transform(x, transform) for x in item)
+            if isinstance(item, torch.Tensor):
+                res = torch.rot90(item, k=transform.rotations_ccw, dims=(-2, -1))
+                if transform.flip_x:
+                    res = torch.flip(res, dims=(-1,))
+                return res
+            return item
+
+        def invert_torch_transform(item: Any, transform: Any) -> Any:
+            if isinstance(item, (list, tuple)):
+                return type(item)(invert_torch_transform(x, transform) for x in item)
+            if isinstance(item, torch.Tensor):
+                res = torch.flip(item, dims=(-1,)) if transform.flip_x else item
+                return torch.rot90(res, k=-transform.rotations_ccw, dims=(-2, -1))
+            return item
+
+        def mean_torch_items(items_list: list[Any]) -> Any:
+            first = items_list[0]
+            if isinstance(first, (list, tuple)):
+                return type(first)(
+                    mean_torch_items([items[i] for items in items_list])
+                    for i in range(len(first))
+                )
+            if isinstance(first, torch.Tensor):
+                return torch.stack(items_list, dim=0).mean(dim=0)
+            return first
+
         heatmaps = []
         features = []
         
         if is_tensor:
             for transform in XY_D4_TRANSFORMS:
-                # Apply TTA natively on PyTorch GPU Tensor
-                aug_frames = torch.rot90(frames, k=transform.rotations_ccw, dims=(-2, -1))
-                if transform.flip_x:
-                    aug_frames = torch.flip(aug_frames, dims=(-1,))
-                    
+                # Apply TTA recursively
+                aug_frames = apply_torch_transform(frames, transform)
                 f_aug, h_aug = self.model.encode(aug_frames)
                 
-                # Invert TTA natively on PyTorch GPU Tensor
-                h_inv = torch.flip(h_aug, dims=(-1,)) if transform.flip_x else h_aug
-                h_inv = torch.rot90(h_inv, k=-transform.rotations_ccw, dims=(-2, -1))
+                # Invert TTA recursively
+                features.append(invert_torch_transform(f_aug, transform))
+                heatmaps.append(invert_torch_transform(h_aug, transform))
                 
-                f_inv = torch.flip(f_aug, dims=(-1,)) if transform.flip_x else f_aug
-                f_inv = torch.rot90(f_inv, k=-transform.rotations_ccw, dims=(-2, -1))
-                
-                heatmaps.append(h_inv)
-                features.append(f_inv)
-                
-            # Average across the 8 stacked TTA views on GPU
-            mean_features = torch.stack(features, dim=0).mean(dim=0)
-            mean_heatmaps = torch.stack(heatmaps, dim=0).mean(dim=0)
+            # Average recursively
+            mean_features = mean_torch_items(features)
+            mean_heatmaps = mean_torch_items(heatmaps)
             return mean_features, mean_heatmaps
             
         else:
