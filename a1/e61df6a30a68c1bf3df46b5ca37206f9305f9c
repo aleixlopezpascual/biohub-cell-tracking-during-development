@@ -1,0 +1,19 @@
+docs/gold_training_session_handoff.md
+  s_42e1290e687897::t_0bd4e0a01dd8cf 10,16,18-22,26,28,35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "a1e61df6a30a68c1bf3df46b5ca37206f9305f9c",
+  "prompts": {},
+  "sessions": {
+    "s_42e1290e687897": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "42440c59-0f24-4501-98e6-bd999496a380",
+        "model": "gemini-3.5-flash"
+      },
+      "human_author": "Aleix López <aleix.lopez@glovoapp.com>"
+    }
+  }
+}
