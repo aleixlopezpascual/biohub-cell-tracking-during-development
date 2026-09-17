@@ -1,0 +1,24 @@
+.superset/teardown.sh
+  s_d5009f1ae7b323::t_c5e941fec573e6 1-5
+.superset/config.json
+  s_d5009f1ae7b323::t_5253a0c1ecab53 1-4
+.superset/setup.sh
+  s_d5009f1ae7b323::t_1b9154a56710f7 1-17,19-25,27,29-31
+  s_d5009f1ae7b323::t_5cb45cd6b2af88 18,26,28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "78d614d109c82c3b115b69cf42db695f27a57f7b",
+  "prompts": {},
+  "sessions": {
+    "s_d5009f1ae7b323": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "2d528bb4-f002-4b86-ac07-d48684ddc32b",
+        "model": "gemini-3.5-flash"
+      },
+      "human_author": "Aleix López <aleix.lopez@glovoapp.com>"
+    }
+  }
+}
