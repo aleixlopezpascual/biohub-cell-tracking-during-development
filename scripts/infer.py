@@ -21,12 +21,13 @@ extraction.
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 import numpy as np
-from scipy.ndimage import maximum_filter
 
 from biohub_tracking.data import OMEZarrVolume
+from biohub_tracking.detection import LocalMaximaDetector, LocalMaximaDetectorConfig
 from biohub_tracking.models import UNet3D
 from biohub_tracking.submission import export_submission
 from biohub_tracking.tracking import Detection, HungarianTracker, TrackerConfig, TrackingGraph
@@ -42,16 +43,35 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--dataset", required=True, help="Dataset name for the submission CSV.")
     parser.add_argument("--output", required=True, type=Path, help="Output submission CSV path.")
     parser.add_argument("--threshold", type=float, default=0.5, help="Heatmap peak-detection threshold.")
-    parser.add_argument("--min-peak-distance", type=int, default=3, help="Non-max suppression window (voxels).")
+    parser.add_argument(
+        "--min-peak-distance-um",
+        type=float,
+        default=3.0,
+        help="Peak separation suppression radius in physical microns.",
+    )
+    parser.add_argument(
+        "--use-subpixel-refinement",
+        action="store_true",
+        help="Enable center-of-mass coordinate refinement.",
+    )
+    parser.add_argument(
+        "--use-dog",
+        action="store_true",
+        help="Enable Multi-Scale Difference of Gaussians (DoG) peak filtering.",
+    )
+    parser.add_argument(
+        "--dog-sigmas",
+        type=float,
+        nargs="+",
+        help="Optional physical sigmas in microns for multi-scale DoG.",
+    )
+    parser.add_argument(
+        "--dog-ratio",
+        type=float,
+        default=1.6,
+        help="DoG large-to-small sigma ratio.",
+    )
     return parser.parse_args(argv)
-
-
-def _extract_peaks(heatmap: np.ndarray, threshold: float, min_distance: int) -> list[tuple[float, float, float]]:
-    """Non-maximum suppression peak detection over a 3D heatmap."""
-    local_max = maximum_filter(heatmap, size=min_distance) == heatmap
-    above_threshold = heatmap >= threshold
-    peaks = np.argwhere(local_max & above_threshold)
-    return [(float(z), float(y), float(x)) for z, y, x in peaks]
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -68,6 +88,18 @@ def main(argv: list[str] | None = None) -> None:
         voxel_size_um=config.data.voxel_size_um,
     )
 
+    detector = LocalMaximaDetector(
+        LocalMaximaDetectorConfig(
+            threshold=args.threshold,
+            min_distance=args.min_peak_distance_um,
+            voxel_size_um=config.data.voxel_size_um,
+            use_subpixel_refinement=args.use_subpixel_refinement,
+            use_dog=args.use_dog,
+            dog_sigmas=args.dog_sigmas,
+            dog_ratio=args.dog_ratio,
+        )
+    )
+
     graph = TrackingGraph()
     node_id = 0
     detections_by_frame: dict[int, list[Detection]] = {}
@@ -75,7 +107,7 @@ def main(argv: list[str] | None = None) -> None:
 
     for t, frame in volume.iter_frames(channels=config.data.channels):
         heatmap = model.predict(frame)[0]
-        for z, y, x in _extract_peaks(heatmap, args.threshold, args.min_peak_distance):
+        for z, y, x in detector.detect(heatmap):
             zu, yu, xu = np.array([z, y, x]) * voxel_size
             detection = Detection(id=node_id, frame=t, z=float(zu), y=float(yu), x=float(xu))
             graph.add_node(detection)
