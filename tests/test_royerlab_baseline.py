@@ -158,3 +158,35 @@ def test_optional_adapters_fail_actionably_without_artifacts_or_runtime(tmp_path
         validate_checkpoint(tmp_path / "missing.pt")
     with pytest.raises(ImportError, match="tracksdata"):
         TracksdataGEFFAdapter().require_runtime()
+
+
+def test_deepcenter_veto_hook_rejects_low_probability_interpolations() -> None:
+    from biohub_tracking.baselines.royerlab.postprocess import (
+        make_deepcenter_veto_hook,
+        GapClosingConfig,
+        close_one_frame_gaps,
+    )
+    graph = TrackingGraph()
+    graph.add_node(_detection("before", 0, 0))
+    graph.add_node(_detection("after", 2, 4))
+    
+    # Heatmap provider that returns 0.1 at (0.0, 0.0, 2.0)
+    provider_low = lambda z, y, x: 0.1
+    veto_hook_low = make_deepcenter_veto_hook(provider_low, threshold=0.25)
+    
+    # Run with veto hook: gap should be rejected since 0.1 < 0.25
+    rejected = close_one_frame_gaps(
+        graph, GapClosingConfig(max_distance_um=5), refinement_hook=veto_hook_low
+    )
+    assert len(rejected.nodes) == 2
+    
+    # Heatmap provider that returns 0.9 at (0.0, 0.0, 2.0)
+    provider_high = lambda z, y, x: 0.9
+    veto_hook_high = make_deepcenter_veto_hook(provider_high, threshold=0.25)
+    
+    # Run with veto hook: gap should be accepted since 0.9 >= 0.25
+    accepted = close_one_frame_gaps(
+        graph, GapClosingConfig(max_distance_um=5), refinement_hook=veto_hook_high
+    )
+    assert len(accepted.nodes) == 3
+

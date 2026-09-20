@@ -209,3 +209,29 @@ def cap_node_budget(
         key=lambda node_id: (-(scores.get(node_id, 0.0) if scores else 0.0), repr(node_id)),
     )
     return _copy_selected(graph, set(ranked[: config.max_nodes]))
+
+
+def make_deepcenter_veto_hook(
+    heatmap_provider: Callable[[float, float, float], float],
+    threshold: float = 0.25,
+) -> RefinementHook:
+    """Create a RefinementHook that vetoes (rejects) proposals using a spatial prior heatmap.
+
+    If the probability returned by ``heatmap_provider`` at the proposed midpoint
+    is below ``threshold``, the proposal is rejected (returns ``None``).
+    """
+    if not 0 <= threshold <= 1:
+        raise ValueError("threshold must be in [0, 1]")
+
+    def veto_hook(
+        _source: Detection,
+        _target: Detection,
+        midpoint: tuple[float, float, float],
+    ) -> tuple[float, float, float] | None:
+        prob = heatmap_provider(*midpoint)
+        if prob < threshold:
+            return None
+        return midpoint
+
+    return veto_hook
+
