@@ -37,6 +37,8 @@ class TrackerConfig:
     gating_time_window: int = 1
     use_sister_symmetry_gate: bool = False
     sister_symmetry_tau: float = 0.6
+    use_ema_velocity_projection: bool = False
+    ema_velocity_alpha: float = 0.5
 
     def __post_init__(self) -> None:
         if self.max_link_distance_um <= 0:
@@ -47,6 +49,8 @@ class TrackerConfig:
             raise ValueError("max_daughters must be >= 2 to represent divisions")
         if self.sister_symmetry_tau <= 0:
             raise ValueError("sister_symmetry_tau must be positive")
+        if not 0.0 < self.ema_velocity_alpha <= 1.0:
+            raise ValueError("ema_velocity_alpha must be in (0, 1]")
 
 
 class HungarianTracker:
@@ -56,7 +60,10 @@ class HungarianTracker:
         self.config = config or TrackerConfig()
 
     def link_frames(
-        self, sources: list[Detection], targets: list[Detection]
+        self,
+        sources: list[Detection],
+        targets: list[Detection],
+        projected_positions: dict[NodeId, tuple[float, float, float]] | None = None,
     ) -> list[tuple[NodeId, NodeId]]:
         """Link one frame of ``sources`` to the next frame's ``targets``.
 
@@ -68,7 +75,15 @@ class HungarianTracker:
             return []
 
         cfg = self.config
-        src_pos = np.array([s.position for s in sources], dtype=float)
+        src_pos = np.array(
+            [
+                projected_positions.get(s.id, s.position)
+                if projected_positions is not None
+                else s.position
+                for s in sources
+            ],
+            dtype=float,
+        )
         tgt_pos = np.array([t.position for t in targets], dtype=float)
         dist = cdist(src_pos, tgt_pos)
 
@@ -129,7 +144,62 @@ class HungarianTracker:
         by_frame = graph.nodes_by_frame()
         result = TrackingGraph(nodes=dict(graph.nodes))
         frames = sorted(by_frame)
+        
+        # Track active velocity vectors per trajectory: last_node_id -> velocity_vector_um
+        active_tracks_velocity: dict[NodeId, tuple[float, float, float]] = {}
+        cfg = self.config
+
         for t0, t1 in zip(frames, frames[1:]):
-            for source_id, target_id in self.link_frames(by_frame[t0], by_frame[t1]):
-                result.add_edge(source_id, target_id)
+            sources = by_frame[t0]
+            targets = by_frame[t1]
+            dt = t1 - t0
+
+            # Compute projected positions for active trajectories
+            projected_positions: dict[NodeId, tuple[float, float, float]] = {}
+            if cfg.use_ema_velocity_projection:
+                for s in sources:
+                    if s.id in active_tracks_velocity:
+                        v = active_tracks_velocity[s.id]
+                        projected_positions[s.id] = (
+                            s.z + v[0] * dt,
+                            s.y + v[1] * dt,
+                            s.x + v[2] * dt,
+                        )
+
+            # Link frames using projections
+            links = self.link_frames(sources, targets, projected_positions=projected_positions if cfg.use_ema_velocity_projection else None)
+            
+            # Map targets and sources by ID for fast lookup
+            targets_dict = {t.id: t for t in targets}
+            sources_dict = {s.id: s for s in sources}
+
+            # Propagate and update EMA velocities for successfully matched edges
+            new_velocities: dict[NodeId, tuple[float, float, float]] = {}
+            for s_id, t_id in links:
+                s_node = sources_dict[s_id]
+                t_node = targets_dict[t_id]
+                
+                v_current = (
+                    (t_node.z - s_node.z) / dt,
+                    (t_node.y - s_node.y) / dt,
+                    (t_node.x - s_node.x) / dt,
+                )
+                
+                if s_id in active_tracks_velocity:
+                    v_prev = active_tracks_velocity[s_id]
+                    alpha = cfg.ema_velocity_alpha
+                    v_new = (
+                        alpha * v_current[0] + (1 - alpha) * v_prev[0],
+                        alpha * v_current[1] + (1 - alpha) * v_prev[1],
+                        alpha * v_current[2] + (1 - alpha) * v_prev[2],
+                    )
+                else:
+                    v_new = v_current
+                    
+                new_velocities[t_id] = v_new
+                result.add_edge(s_id, t_id)
+            
+            # Update active velocities for the next frame
+            active_tracks_velocity = new_velocities
+            
         return result

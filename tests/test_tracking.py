@@ -110,3 +110,39 @@ def test_hungarian_tracker_respects_sister_symmetry_gate() -> None:
     )
     edges_on = tracker_on.link_frames(sources, targets)
     assert set(edges_on) == {("p", "d1")}
+
+
+def test_tracker_config_validation_for_ema() -> None:
+    with pytest.raises(ValueError, match="alpha"):
+        TrackerConfig(use_ema_velocity_projection=True, ema_velocity_alpha=-0.1)
+    with pytest.raises(ValueError, match="alpha"):
+        TrackerConfig(use_ema_velocity_projection=True, ema_velocity_alpha=1.5)
+
+
+def test_velocity_projection_resolves_crossover_occlusions() -> None:
+    # Two trajectories crossing paths at Frame 1:
+    # Trajectory 1: moving right (+2.0 um/frame) from (0,0,0) -> (0,0,2) -> expects (0,0,4)
+    # Trajectory 2: moving left (-2.0 um/frame) from (0,0,5) -> (0,0,3) -> expects (0,0,1)
+    graph = TrackingGraph()
+    # Frame 0
+    graph.add_node(_det("s1", 0, 0, 0, 0))
+    graph.add_node(_det("s2", 0, 0, 0, 5))
+    # Frame 1
+    graph.add_node(_det("m1", 1, 0, 0, 2))
+    graph.add_node(_det("m2", 1, 0, 0, 3))
+    # Frame 2
+    graph.add_node(_det("e1", 2, 0, 0, 4))
+    graph.add_node(_det("e2", 2, 0, 0, 1))
+
+    # 1. Run tracking with projection disabled (causes crossover error matching m1->e2 and m2->e1)
+    tracker_off = HungarianTracker(TrackerConfig(max_link_distance_um=5.0, use_ema_velocity_projection=False))
+    tracked_off = tracker_off.track(graph)
+    assert ("m1", "e2") in tracked_off.edges
+    assert ("m2", "e1") in tracked_off.edges
+
+    # 2. Run tracking with projection enabled (correctly matches m1->e1 and m2->e2)
+    tracker_on = HungarianTracker(TrackerConfig(max_link_distance_um=5.0, use_ema_velocity_projection=True, ema_velocity_alpha=1.0))
+    tracked_on = tracker_on.track(graph)
+    assert ("m1", "e1") in tracked_on.edges
+    assert ("m2", "e2") in tracked_on.edges
+
