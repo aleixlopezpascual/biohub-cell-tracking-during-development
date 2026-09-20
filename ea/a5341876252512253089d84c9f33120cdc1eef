@@ -1,0 +1,21 @@
+src/biohub_tracking/baselines/royerlab/postprocess.py
+  s_2143548bdc3a42::t_a7635146bee135 212-237
+tests/test_royerlab_baseline.py
+  s_2143548bdc3a42::t_7f28915a955bb6 161-192
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "eaa5341876252512253089d84c9f33120cdc1eef",
+  "prompts": {},
+  "sessions": {
+    "s_2143548bdc3a42": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "2cff838d-a9a2-4c96-8aa8-96686fe83128",
+        "model": "gemini-3.5-flash"
+      },
+      "human_author": "Aleix López"
+    }
+  }
+}
