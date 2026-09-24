@@ -23,6 +23,7 @@ class BaselinePipelineConfig:
     use_dog: bool = False
     dog_sigmas: list[float] | None = None
     dog_ratio: float = 1.6
+    use_subpixel_refinement: bool = False
 
 
 def infer_volume(volume: OMEZarrVolume, config: BaselinePipelineConfig | None = None) -> TrackingGraph:
@@ -45,6 +46,7 @@ def infer_volume(volume: OMEZarrVolume, config: BaselinePipelineConfig | None = 
             use_dog=cfg.use_dog,
             dog_sigmas=cfg.dog_sigmas,
             dog_ratio=cfg.dog_ratio,
+            use_subpixel_refinement=cfg.use_subpixel_refinement,
         )
     )
     graph = TrackingGraph()

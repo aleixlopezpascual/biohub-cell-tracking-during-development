@@ -40,6 +40,28 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--max-link-distance-um", type=float, default=15.0)
     parser.add_argument("--division-search-radius-um", type=float, default=20.0)
     parser.add_argument("--max-daughters", type=int, default=2)
+    parser.add_argument(
+        "--use-subpixel-refinement",
+        action="store_true",
+        help="Enable center-of-mass centroid refinement.",
+    )
+    parser.add_argument(
+        "--use-dog",
+        action="store_true",
+        help="Enable Difference-of-Gaussians (DoG) peak detection.",
+    )
+    parser.add_argument(
+        "--dog-sigmas",
+        type=float,
+        nargs="+",
+        help="Optional physical sigmas in microns for multi-scale DoG.",
+    )
+    parser.add_argument(
+        "--dog-ratio",
+        type=float,
+        default=1.6,
+        help="Sigma ratio for DoG calculation.",
+    )
     return parser.parse_args(argv)
 
 
@@ -62,6 +84,10 @@ def main(argv: list[str] | None = None) -> None:
                 division_search_radius_um=args.division_search_radius_um,
                 max_daughters=args.max_daughters,
             ),
+            use_dog=args.use_dog,
+            dog_sigmas=args.dog_sigmas,
+            dog_ratio=args.dog_ratio,
+            use_subpixel_refinement=args.use_subpixel_refinement,
         ),
     )
     export_submission({args.dataset: graph}, args.output)

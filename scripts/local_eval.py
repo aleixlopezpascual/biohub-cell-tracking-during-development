@@ -36,6 +36,32 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help="Also write detection-vs-linking oracle headroom diagnostics.",
     )
+    parser.add_argument(
+        "--min-component-nodes",
+        type=int,
+        help="Drop weakly connected track components containing fewer than N nodes.",
+    )
+    parser.add_argument(
+        "--max-nodes",
+        type=int,
+        help="Limit prediction count per dataset to a specified budget.",
+    )
+    parser.add_argument(
+        "--close-gaps",
+        action="store_true",
+        help="Bridge eligible terminal-to-root pairs two frames apart with midpoint nodes.",
+    )
+    parser.add_argument(
+        "--gap-max-distance-um",
+        type=float,
+        default=12.0,
+        help="Maximum physical distance in microns to search for/allow gap bridging.",
+    )
+    parser.add_argument(
+        "--postprocessed-output",
+        type=Path,
+        help="Optional path to write the newly postprocessed submission CSV.",
+    )
     return parser.parse_args(argv)
 
 
@@ -55,8 +81,40 @@ def main(argv: list[str] | None = None) -> None:
             datasets = fold.evaluate
             split_provenance = fold.provenance
 
+    submission_input = args.submission
+
+    if args.min_component_nodes is not None or args.max_nodes is not None or args.close_gaps:
+        from biohub_tracking.baselines.royerlab.postprocess import (
+            GapClosingConfig,
+            NodeBudgetConfig,
+            ShortComponentConfig,
+            cap_node_budget,
+            close_one_frame_gaps,
+            filter_short_components,
+        )
+        from biohub_tracking.evaluation.local_score import load_submission_graphs
+        from biohub_tracking.submission import export_submission, graphs_to_dataframe
+
+        graphs = load_submission_graphs(args.submission)
+        processed_graphs = {}
+        for name, graph in graphs.items():
+            g = graph
+            if args.close_gaps:
+                g = close_one_frame_gaps(g, GapClosingConfig(max_distance_um=args.gap_max_distance_um))
+            if args.min_component_nodes is not None:
+                g = filter_short_components(g, ShortComponentConfig(min_nodes=args.min_component_nodes))
+            if args.max_nodes is not None:
+                g = cap_node_budget(g, NodeBudgetConfig(max_nodes=args.max_nodes))
+            processed_graphs[name] = g
+
+        if args.postprocessed_output is not None:
+            export_submission(processed_graphs, args.postprocessed_output)
+            submission_input = args.postprocessed_output
+        else:
+            submission_input = graphs_to_dataframe(processed_graphs)
+
     result = score_submission(
-        args.submission,
+        submission_input,
         args.gt_submission,
         datasets=datasets,
         cv_pack_dir=args.cv_pack_dir,
@@ -79,7 +137,7 @@ def main(argv: list[str] | None = None) -> None:
 
     if args.oracle_analysis:
         oracle = analyze_oracle_headroom(
-            args.submission,
+            submission_input,
             args.gt_submission,
             datasets=datasets,
             cv_pack_dir=args.cv_pack_dir,
