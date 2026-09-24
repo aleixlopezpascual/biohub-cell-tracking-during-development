@@ -134,6 +134,8 @@ runtime_config.update(
 CONFIG = Path("/kaggle/working/gold_training_runtime.yaml")
 CONFIG.write_text(yaml.safe_dump(runtime_config, sort_keys=False), encoding="utf-8")
 
+DETECTION_THRESHOLD = float(os.environ.get("BIOHUB_DETECTION_THRESHOLD", "0.60"))
+
 command = [
     sys.executable,
     str(REPO_DIR / "scripts" / "run_gold_stage.py"),
@@ -143,6 +145,8 @@ command = [
     CANDIDATE,
     "--target-epoch",
     str(TARGET_EPOCH),
+    "--detection-threshold",
+    str(DETECTION_THRESHOLD),
 ]
 if RESUME:
     command.append("--resume")

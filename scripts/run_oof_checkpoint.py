@@ -335,6 +335,28 @@ def _evaluate_pairs(
         "geffs": [predictions_dir / f"{name}.geff" for name in sorted(names)],
     }
     rows = evaluator.evaluate_run(run, max_distance=7.0)
+    evaluated_names = {str(row.get("dataset")) for row in rows if "dataset" in row}
+    missing_names = [n for n in names if n not in evaluated_names]
+
+    # When an early-stage checkpoint produces zero nodes on an embryo volume, the official evaluator
+    # can crash with KeyError('z') and omit the row. We fill in a clean 0.0 baseline row instead of aborting.
+    for name in missing_names:
+        rows.append(
+            {
+                "dataset": name,
+                "edge_tp": 0,
+                "edge_fp": 0,
+                "edge_fn": 1,
+                "node_recall": 0.0,
+                "score": 0.0,
+                "adj_edge_jaccard": 0.0,
+                "edge_jaccard": 0.0,
+                "division_tp": 0,
+                "division_fp": 0,
+                "division_fn": 0,
+            }
+        )
+
     skipped = []
     for row in rows:
         try:

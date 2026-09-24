@@ -35,6 +35,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help="Skip training and only finish/score OOF inference for the target.",
     )
+    parser.add_argument(
+        "--detection-threshold",
+        type=float,
+        help="Override detection threshold for OOF validation.",
+    )
     return parser.parse_args(argv)
 
 
@@ -191,6 +196,8 @@ def main(argv: list[str] | None = None) -> None:
         oof_command.append("--resume")
     if args.score_only:
         oof_command.append("--score-only")
+    if args.detection_threshold is not None:
+        oof_command.extend(["--detection-threshold", str(args.detection_threshold)])
     _run(oof_command, repo_root)
     summary_path = (
         output_dir
