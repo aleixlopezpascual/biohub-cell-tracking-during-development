@@ -1,0 +1,19 @@
+docs/endgame_status_and_strategy.md
+  s_93a7dffeef75d0::t_aaac23547d5379 70-109
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "d94de324bfcf6a19b11d6f0e2f71111e8185a39d",
+  "prompts": {},
+  "sessions": {
+    "s_93a7dffeef75d0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "61e220e3-2713-4f3c-9ba3-631fb787fe8f",
+        "model": "gemini-3.5-flash"
+      },
+      "human_author": "Aleix López"
+    }
+  }
+}
