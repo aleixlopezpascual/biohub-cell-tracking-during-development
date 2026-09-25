@@ -67,3 +67,43 @@ Once the GPU quota resets in ~38 hours (Saturday, September 26):
 Under Kaggle rules, every team must manually select **two submissions** for private leaderboard scoring:
 1. **Selection 1 (Robust Anchor):** `biohub-0-946-edge-feature-tta-tuned` (Submission `56132481`, LB `0.946`).
 2. **Selection 2 (Peak Candidate):** `biohub-0-948-momentum-deepcenter-tta` (Targeting `0.95+`).
+
+---
+
+## 6. Actionable Endgame TODO Checklist
+
+### Completed Tasks
+- [x] **Diagnose GPU Status:** Identified that weekly 30-hour GPU quota was hit; confirmed exact ~38h reset schedule.
+- [x] **Pivot to High-ROI Strategy:** Dropped expensive scratch training to focus on pure, fast inference with pre-trained backbones.
+- [x] **Prepare 0.948 Momentum + DeepCenter Pipeline:**
+  - Implemented EMA spatiotemporal velocity projection ($v_t = 0.6 \cdot v_{\text{instant}} + 0.4 \cdot v_{\text{prior}}$).
+  - Integrated DeepCenter image-space heatmap vetos.
+  - Verified Python AST syntax and Kaggle kernel metadata in `scripts/kaggle_kernels/biohub_0_948_momentum_deepcenter_tta/`.
+- [x] **Secure Codebase & Sync Remote:** 
+  - All 119 unit tests passing (100% green).
+  - Merged and pushed cleanly to GitHub `origin/master`.
+  - Updated persistent memory index and `docs/endgame_status_and_strategy.md`.
+
+### Phase 1: When GPU Quota Resets (~38h — Saturday morning, ~02:00 UTC)
+- [ ] **1. Launch 0.948 Inference Run on Kaggle:**
+  ```bash
+  kaggle kernels push -p scripts/kaggle_kernels/biohub_0_948_momentum_deepcenter_tta
+  ```
+- [ ] **2. Submit the Predictions to the Leaderboard:**
+  Once the ~80-minute run completes on Kaggle:
+  ```bash
+  kaggle competitions submit -c biohub-cell-tracking-during-development -k aleixlopez/biohub-0-948-momentum-deepcenter-tta -f submission.csv -v 1 -m "Biohub 0.948 Momentum DeepCenter TTA Inference"
+  ```
+- [ ] **3. Record New Leaderboard Score:** Log the public score in `results/kaggle_lb/submissions.csv` (targeting **`0.948` – `0.952`**).
+
+### Phase 2: Weekend Iteration & Tuning (Saturday, Sep 26 – Monday, Sep 28)
+- [ ] **(Optional) Threshold Sensitivity Sweep:** If the momentum submission shows strong gains, test a minor threshold variation (e.g. `0.958` vs `0.962`) to find the sweet spot.
+- [ ] **(Optional) Run Fold B Benchmark:** If we want to complete the official cross-validation record:
+  ```bash
+  kaggle kernels push -p scripts/kaggle_kernels/gold_public_oof_b
+  ```
+
+### Phase 3: Final Submission Selection (Tuesday, September 29 — Deadline Day)
+- [ ] **Select Final Submission 1 (Proven Anchor):** `aleixlopez/biohub-0-946-edge-feature-tta-tuned` (Submission `#56132481`, Public Score: **`0.946`**).
+- [ ] **Select Final Submission 2 (Peak Candidate):** The highest-scoring momentum submission from Saturday's run (`0.948+`).
+- [ ] **Double Check Selection Checkboxes:** Ensure the checkboxes under the Kaggle **"My Submissions"** tab are firmly checked before 23:59 UTC!
