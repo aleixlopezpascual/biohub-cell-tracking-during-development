@@ -2,7 +2,9 @@
 
 This document serves as your concrete, step-by-step instructions for what to run and configure the moment your weekly Kaggle GPU quota resets. 
 
-By executing this plan, you will combine our custom model checkpoints with **Feature-Level TTA**, **Bidirectional Tracking**, and **Multi-Model Ensembling** to produce a solution that outclasses any single public notebook in the competition.
+> **Status correction (2026-09-25):** This is a historical plan, not an execution authorization. It has not established that its proposed run will beat any public notebook or secure a medal. Do not resume `temporal-pu-a` from epoch 10 until its recorded `0.0079` OOF score / `0.017` node recall is diagnosed. The current ordered queue and GPU/provenance gate are in `docs/competition_idea_backlog.md`.
+
+The intended experiment was to combine custom checkpoints with **Feature-Level TTA**, **Bidirectional Tracking**, and **Multi-Model Ensembling**. This has not been validated as a result that outclasses public notebooks.
 
 ---
 
@@ -22,18 +24,9 @@ Before training any custom models, we want to evaluate the clean public 50-epoch
 
 ---
 
-## 🏋️‍♂️ Step 2: Launch the Custom 50-Epoch Disjoint Folds (Approx. 4-5 hours)
+## 🏋️‍♂️ Step 2: Custom 50-Epoch Disjoint Folds — BLOCKED
 
-Now that our training pipeline is verified as **100% bug-free** via our detector sanity check, we can train our own models on both disjoint folds to enable fold ensembling.
-
-1.  Open your training kernel: **`aleixlopez/biohub-gold-oof-runner`**.
-2.  Configure your environment variables in the notebook's environment:
-    *   `BIOHUB_CANDIDATE` = `temporal-pu-a`
-    *   `BIOHUB_TARGET_EPOCH` = `50` (or `60` to let it converge fully)
-    *   `BIOHUB_RESUME` = `1` (to resume training from epoch 10)
-3.  Click **Run**.
-4.  **What it does:** This will resume training the model from epoch 10 up to epoch 50 on both disjoint folds, generating your own custom, converged weights.
-5.  **Output Artifacts:** Checkpoints will be saved as `temporal-pu-a_model.pth` under your outputs.
+**Do not resume `temporal-pu-a` from epoch 10 using the instructions in this historical plan.** The experiment ledger records an OOF score of `0.0079` and node recall of `0.017`; diagnose that result before spending another GPU allocation. The current endgame priority is the staged inference candidate in `docs/competition_idea_backlog.md`, not scratch-training this checkpoint.
 
 ---
 
@@ -57,4 +50,4 @@ Once your custom checkpoints have finished training, we can ensemble them with t
 4.  **Execute Overlay Prediction:**
     *   Run predictions with both **Edge-Feature TTA** and **Bidirectional Tracking** enabled.
     *   Use the community-optimal threshold of **`0.96`**.
-5.  **Submit to Leaderboard:** Export the final `submission.csv` and submit it to the competition to secure your high-ranking Silver/Gold medal standing!
+5.  **Submit to Leaderboard:** Submit only after the candidate passes fold-disjoint validation and the user explicitly approves; no medal standing is guaranteed.

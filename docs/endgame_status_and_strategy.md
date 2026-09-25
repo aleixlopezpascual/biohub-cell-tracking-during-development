@@ -2,6 +2,13 @@
 
 Documented on Thursday, September 24, 2026.
 
+## Fresh correction — 2026-09-25
+
+- The current public-board snapshot puts submission `56132481` / score `0.946` at rank **1,221 of 3,899**, outside the current top-10% bronze threshold (389 teams). The earlier “Solid Silver Medal Standing” label below was incorrect for the current standings; medal allocation uses final private standings and the public board is only a partial proxy.
+- The public leaderboard uses about 29% of test data; the final ranking uses the other 71%. A `0.948` score would still be outside the current public bronze line.
+- The GPU quota/reset numbers and run schedule below are estimates from September 24, not live-verified on September 25. User reports GPU access remains unavailable.
+- The staged `0.948` candidate is **not yet run/scored** and remains blocked on provenance/quality-gate confirmation. See `docs/kaggle_deep_dive_2026-09-25.md`, `docs/competition_idea_backlog.md`, and `docs/kernel_audits/0948_cpu_preflight.md` before acting.
+
 ---
 
 ## 1. Competition Timeline & Deadlines
@@ -19,7 +26,7 @@ Documented on Thursday, September 24, 2026.
 
 * **Best Scored Submission:**
   * **Submission ID:** `56132481`
-  * **Public Leaderboard Score:** **`0.946`** (Solid Silver Medal Standing).
+  * **Public Leaderboard Score:** **`0.946`** (current public snapshot rank 1,221/3,899; not currently in medal range).
   * **Candidate:** `aleixlopez/biohub-0-946-edge-feature-tta-tuned` (Version 2).
   * **Key Components:**
     * 3D U-Net intermediate Edge-Feature Test-Time Augmentation (Edge TTA).
@@ -45,7 +52,7 @@ Instead of burning scarce GPU hours training custom models from scratch (which t
 
 ## 4. Execution Plan on Quota Reset
 
-Once the GPU quota resets in ~38 hours (Saturday, September 26):
+If/when GPU access is actually available (the reset estimate below is stale and must be rechecked):
 1. **Trigger the Run:**
    ```bash
    kaggle kernels push -p scripts/kaggle_kernels/biohub_0_948_momentum_deepcenter_tta
@@ -62,11 +69,11 @@ Once the GPU quota resets in ~38 hours (Saturday, September 26):
 
 ---
 
-## 5. Final Two-Submission Selection Rule (Before Sept 29)
+## 5. Final-Submission Selection Rule (Before Sept 29)
 
-Under Kaggle rules, every team must manually select **two submissions** for private leaderboard scoring:
+Kaggle permits **up to two** submissions for private leaderboard scoring; it does not require filling both slots. Select only candidates that have run and passed the validation/promotion gate:
 1. **Selection 1 (Robust Anchor):** `biohub-0-946-edge-feature-tta-tuned` (Submission `56132481`, LB `0.946`).
-2. **Selection 2 (Peak Candidate):** `biohub-0-948-momentum-deepcenter-tta` (Targeting `0.95+`).
+2. **Selection 2 (Peak Candidate):** `biohub-0-948-momentum-deepcenter-tta` only if its actual run, provenance, and validation pass (the notebook name/target is not a score).
 
 ---
 

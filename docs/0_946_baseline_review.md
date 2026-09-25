@@ -1,6 +1,6 @@
 # Biohub 0.946 LB Baseline Review
 
-Review and documentation of our tuned peak public leaderboard baseline notebook `aleixlopez/biohub-0-946-edge-feature-tta-tuned` (LB 0.946, exploit-free, Silver Medal Standing).
+Review and documentation of our tuned public leaderboard baseline notebook `aleixlopez/biohub-0-946-edge-feature-tta-tuned` (LB 0.946, exploit-free). Medal standing is dynamic: as of the 2026-09-25 snapshot this submission is rank 1,221/3,899, outside the current top-10% bronze cutoff; see `docs/kaggle_deep_dive_2026-09-25.md`.
 
 ## Core Insights & Methodology
 
@@ -43,7 +43,7 @@ The scored results of this run have been programmatically registered in our expe
   * **Submission ID:** `56132481`
   * **Submitted At:** `2026-09-09T23:38:09.097000Z`
   * **Commit SHA:** `a4b0684f751b5bd6414f9190454ba6d57df4d19d`
-  * **Public Score:** **`0.946`** (Silver Medal Standing)
+  * **Public Score:** **`0.946`** (submission `56132481`; current rank is snapshot-dependent)
   * **Notes:** Verified clean run (0 exploit rows), combining flexonafft's Edge-Feature TTA with our programmatically tuned `0.96` detection threshold.
 
 ---

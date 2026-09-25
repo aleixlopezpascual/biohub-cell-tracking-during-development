@@ -1,13 +1,15 @@
 # Final Submission Selection Strategy
 
-Strategic guide and risk assessment for selecting our **two final submissions** for the Kaggle Biohub Cell Tracking leaderboard.
+Strategic guide and risk assessment for selecting up to two final submissions for the Kaggle Biohub Cell Tracking leaderboard.
+
+> **Updated status note (2026-09-25):** Kaggle permits up to two final submissions, not exactly two. Our `0.946` submission is currently public rank 1,221/3,899, not a current medal position. The Candidate 2 parameter changes below are hypotheses only; do not select one without fold-disjoint validation. See `docs/kaggle_deep_dive_2026-09-25.md` and `docs/competition_idea_backlog.md`.
 
 ---
 
-## 1. The Two-Submission Rule
-Kaggle allows every competitor to select exactly **two (2) submissions** to be graded on the private test set to determine final leaderboard standings and medal allocations. 
+## 1. The Up-to-Two-Submission Rule
+Kaggle allows each team to select **up to two (2) submissions** to be graded on the private test set; it is not necessary to fill both slots. The public leaderboard is only a partial test split, so prioritize robust validation over maximizing the number of finalists.
 
-To maximize our chances of success, we must not select two highly correlated submissions that share the same overfitting traps. Instead, we should employ a **two-pronged strategy**:
+If we select two submissions, they should not be highly correlated candidates that share the same overfitting traps. Use a two-pronged strategy only when both candidates are validated; otherwise select only the best proven submission:
 * **Submission A (Aggressive):** Optimized for the Public Test set (maximizing known Public LB score).
 * **Submission B (Conservative):** Optimized for robust generalization on unseen Private Test biological volumes (minimizing shakeup risk).
 
@@ -53,8 +55,9 @@ When the competition deadline approaches, we should select our two candidates as
 * **Score:** **`0.946`** Public LB
 * **Philosophy:** Stacks both Igor's Edge-Feature TTA and our optimal `0.96` threshold knob to secure our best possible score on the known test set.
 
-### Candidate 2: The Private LB Generalist (Submission ID: `TBD`)
+### Candidate 2: Potential Private-LB Generalist (only if validated; Submission ID: `TBD`)
 * **Configuration:** A modified `0.946` pipeline with **increased safety margins** to handle biological and optical drift:
+  * The following settings are unvalidated hypotheses, not a ready-to-submit recommendation.
   * Raise the detection threshold slightly back to **`0.965`** to ensure robustness against lower-contrast images.
   * Loosen or completely disable the hard fractional division caps (`GLOBAL_FRAC_CAP` and `FRAME_FRAC_CAP`) to let the geometric tracking rules (`safe-div` parent-sister symmetry and forward divergence) decide division topology naturally.
   * Optionally reduce the secondary edge feature TTA weight slightly (`0.50` instead of `0.75`) to avoid ensembling over-reliance if the secondary model weights drift on private domains.
