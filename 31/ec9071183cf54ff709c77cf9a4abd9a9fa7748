@@ -1,0 +1,28 @@
+tests/test_kaggle_notebook_provenance.py
+  s_27d43be008954b::t_158abeeec80300 1,3-4,11-12,15,18-19,21-23,26-28,30-32,35-36,38,41,44-46,48-50,53
+  s_0c293496b245a4::t_a0f43aa4df0448 2,13,16-17,24-25,33-34,51-52,54-56,58-63,65-68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "31ec9071183cf54ff709c77cf9a4abd9a9fa7748",
+  "prompts": {},
+  "sessions": {
+    "s_0c293496b245a4": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "04f60a0b-cfd0-4436-8635-2bfa0b57e3b9",
+        "model": "gemini-3.1-pro-preview"
+      },
+      "human_author": "Aleix López"
+    },
+    "s_27d43be008954b": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "b6039819-45db-4cb3-a894-bec01c852ab7",
+        "model": "gemini-3.1-pro-preview"
+      },
+      "human_author": "Aleix López"
+    }
+  }
+}
