@@ -2,7 +2,7 @@
 
 Strategic guide and risk assessment for selecting up to two final submissions for the Kaggle Biohub Cell Tracking leaderboard.
 
-> **Updated status note (2026-09-25):** Kaggle permits up to two final submissions, not exactly two. Our `0.946` submission is currently public rank 1,221/3,899, not a current medal position. The Candidate 2 parameter changes below are hypotheses only; do not select one without fold-disjoint validation. See `docs/kaggle_deep_dive_2026-09-25.md` and `docs/competition_idea_backlog.md`.
+> **Current status (2026-09-26):** The live submission query still shows `56132481` at `0.946`; its rank/medal context below is a dated September 25 snapshot, not current standings. The staged `0.948` candidate is unscored, and the Candidate 2 parameter changes below are historical hypotheses—not a ready candidate. Keep only the proven anchor unless a distinct candidate passes fold-disjoint validation. Current blockers, GPU needs, and approval gates are in [`endgame_next_steps_and_blockers.md`](endgame_next_steps_and_blockers.md); refresh the leaderboard before making current-rank claims.
 
 ---
 

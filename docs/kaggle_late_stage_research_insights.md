@@ -1,6 +1,8 @@
-# Kaggle Late-Stage Research Insights & Action Plan
+# Archived Kaggle Late-Stage Research Insights
 
 This document archives our late-stage research from Kaggle discussions and notebooks, capturing critical techniques that top competitors used to push scores into the `0.940+` and `0.960+` ranges.
+
+> **Historical idea review, not the current task list.** Its suggested calibrations and implementation ideas were not validated for the staged 0.948 EMA candidate. Follow [`endgame_next_steps_and_blockers.md`](endgame_next_steps_and_blockers.md) for current priorities and evidence requirements; do not spend GPU time on these ideas until the paired fold-disjoint gate is addressed.
 
 ---
 

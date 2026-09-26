@@ -2,7 +2,7 @@
 
 ## Scope and timestamp
 
-Audited on **2026-09-25 14:17 CEST** from the local project workspace. This was a static, CPU-only review; no notebook cells were executed, no Kaggle kernel was pushed or run, and no competition submission was made.
+Initial static audit on **2026-09-25 14:17 CEST** from the local project workspace. A follow-up read-only Kaggle state check was performed on **2026-09-26 00:47 CEST**, with a fresh submission/kernel-list query on **2026-09-26 11:58 CEST**. No notebook cells were executed, no Kaggle kernel was pushed or run, and no competition submission was made during these checks.
 
 Reviewed candidate:
 
@@ -21,10 +21,10 @@ Notebook cell numbers below are zero-based; line numbers within a cell are one-b
 ## Candidate and baseline provenance
 
 - The submission ledger's best scored entry is still submission `56132481`, candidate `biohub-0-946-edge-feature-tta-tuned`, public score `0.946`, submitted 2026-09-09. There is **no 0.948 score entry** in `results/kaggle_lb/submissions.csv`.
-- Both staged notebooks contain 12 code cells. A source comparison found that **only code cell 5 differs** between the 0.948 and 0.946 notebook files; cells 0–4 and 6–11 are identical.
-- The sole code delta is the motion relinking implementation in cell 5: the 0.948 version maintains velocity per track, predicts positions using that velocity, and updates it as `0.6 * instant_vel + 0.4 * prior_vel`. This supports describing EMA velocity projection as the actual staged code change from the 0.946 notebook.
-- DeepCenter settings and code are present in both notebook versions: cell 0 requests DeepCenter and requires the veto; it sets gap and safe-division vetoes and threshold values. DeepCenter is therefore **not an additional code delta** between these two staged files, even though the endgame document describes it as an improvement “over 0.946.”
-- The 0.948 notebook's cell 0 labels the score axis `public 0.939 base + holdout-selected post-process configuration` (lines 12–13). Its cell 1 says the baseline is public LB `0.913` (line 41). These are not consistent with each other or with the 0.946 score recorded in the ledger. The staged name/title is a candidate label, not score evidence.
+- Both staged notebooks contain 12 code cells. Before the approved provenance correction, only cell 5 differed. Comparing the current local files now finds source differences in cells **0, 1, 5, and 6**: cells 0, 1, and 6 contain the documented score/provenance/report corrections, while cell 5 contains the tracking behavior change.
+- The only tracking-algorithm delta is cell 5's motion relinker: the 0.948 version maintains velocity per track, predicts positions using that velocity, and updates it as `0.6 * instant_vel + 0.4 * prior_vel`. The changes to cells 0, 1, and 6 update score labels, diagnostics, and the provenance/runtime report; they do not add a second detection/linking method.
+- DeepCenter settings and code are present in both notebook versions: cell 0 requests DeepCenter and requires the veto; it sets gap and safe-division vetoes and threshold values. DeepCenter is therefore **not an additional algorithmic delta** between these two staged files.
+- Before the approved correction, candidate cell 0 and cell 1 contained inconsistent historical score labels (`0.939` and `0.913`). The current local versions now explicitly say **unscored** and identify the 0.946 parent/EMA delta. Neither the old labels nor the staged name is score evidence; the ledger still contains no 0.948 score.
 
 ## Metadata and attached artifacts
 
@@ -38,13 +38,13 @@ Notebook cell numbers below are zero-based; line numbers within a cell are one-b
 - Candidate cell 0 assigns 45 `BIOHUB_*` environment variables. Candidate cell 1 checks only six numeric and two text variables. The guard therefore does not lock most declared settings, including several motion, DeepCenter, gap-repair, division, and rescue settings against accidental drift.
 - The sidecar kernel metadata says GPU enabled, but the embedded notebook metadata says GPU disabled; see the unresolved metadata conflict above.
 - Candidate cell 0 sets `BIOHUB_BIDIRECTIONAL_EDGE_WEIGHT` to `0.15` (line 61). Cell 1's numeric guard expects `0.15` (line 12), the executable patch cell 4 independently rejects values other than `0.15` (source lines 171–180), and the resolved-state diagnostic in cell 11 reports the live environment value (source lines 20–22). These executable checks agree.
-- In contrast, candidate cell 1 prints `Reverse-time association weight: 0.200` (line 43), and describes a fixed-90 dual-seed baseline at `0.913` (line 41); those lines disagree with the active `0.15` weight and the candidate's other score-axis label. Cell 1 also describes “harmonic mutual-support association fusion” as the single model-level change (line 42), although the only source-code delta versus the 0.946 notebook is the EMA relinker in cell 5.
-- Candidate cell 6's `configuration` provenance block (source lines 135–149) records several values unlike cell 0's current environment assignments—for example detector threshold `0.96875` versus `0.96`, ILP disappearance weight `1.5` versus `2`, and gap-close distance `5.8` versus `5.0`. The report also calls its experiment `harmonic_bidirectional_association_v1` and names a separate parent experiment (lines 125–130). This may be a historical experiment receipt rather than the active runtime config, but its placement inside the current candidate's audit report is ambiguous. Resolve the provenance before treating it as a candidate run record.
-- Classification: the weight and score strings in cell 1 are **diagnostic/provenance-only mismatches** because the active patch guard and final runtime manifest use the declared `0.15`; the cell 6 configuration block is a **provenance mismatch requiring confirmation**; whether the embedded GPU flag changes runtime is **unresolved**. No local execution was used to guess at their runtime effects.
+- The approved cell 1 correction removed the stale `0.200` reverse-time weight, `0.913` baseline, and incorrect harmonic-association attribution. It now labels the candidate unscored, names EMA relinking as the code delta, and prints the configured bidirectional weight. The independent executable `0.15` guard in cells 1/4 and resolved-state diagnostic in cell 11 remain the runtime checks.
+- The approved cell 6 correction replaced the prior historical-looking experiment/parent/config values with the 0.948 candidate identity, the 0.946 parent, an explicit unscored state, and an allowlisted snapshot of declared `BIOHUB_*` environment settings. This records configured values, not proof of which values or weights actually loaded during a Kaggle run. The upstream diagnostic reference remains unverified.
+- Current classification: prior score/attribution inconsistencies in cells 0/1 and stale cell 6 config have been corrected locally; the upstream source attribution and actual runtime/artifact state remain **unverified**; sidecar versus embedded GPU settings remain **conflicting**. No local execution was used to guess at their runtime effects.
 
 ## EMA motion relinking review
 
-The only code delta is in candidate cell 5's `motion_relink_edges` function (source lines 420–545). In particular:
+The only tracking-algorithm delta is in candidate cell 5's `motion_relink_edges` function (source lines 420–545). In particular:
 
 - It keeps `track_velocity_um` keyed by node ID (line 455).
 - It uses the previous tracked velocity, or derives one from the predecessor position, when projecting a source position (lines 471–476).
@@ -73,33 +73,60 @@ This is a meaningful runtime graph/schema guard, but its checks have not been ex
 - `python3 -m json.tool` on the 0.948 notebook and sidecar metadata: **PASS**.
 - `python3 -m json.tool` on the 0.946 notebook and sidecar metadata: **PASS**.
 - Read-only AST parse of all 12 code cells in the 0.948 notebook: **PASS**. No cell was executed.
-- `PYTHONPATH=src python3 -m pytest -q`: **119 passed, 4 skipped in 7.13s**.
+- Initial audit test run on 2026-09-25, before the EMA characterization test was added: `PYTHONPATH=src python3 -m pytest -q` — **119 passed, 4 skipped in 7.13s**.
 - Search for `*.zarr` under the project: **0 files found**.
 - Search for `*.geff` under `outputs/`: **0 files found**.
 - Search for the required `bidirectional_blend_union13_receipt.json` in the project: **0 files found**.
+- Source search found no checked-in producer or validator for that receipt. Candidate cell 6 only writes the `required_receipt`, `required_condition`, `execute_push_submit`, and null `validated_receipt_sha256` fields into a report; it does not load a receipt or enforce the condition. The provenance test checks these source strings, not receipt contents or a real promotion result.
+- `scripts/kaggle_kernels/gold_oof_runner/kernel.py` is not that producer: it runs a separate Gold-training OOF workflow (defaults to `temporal-pu-a`, epoch 10) and documents `promotion.json` among its outputs. Kaggle lists its lastRunTime as `2026-09-22T14:37:51.693000`, but `kaggle kernels files aleixlopez/biohub-gold-oof-runner` returned an empty list. Its output is neither available here nor evidence for the 0.948 EMA ablation.
+
+## Read-only Kaggle follow-up — 2026-09-26
+
+- `kaggle kernels list --user aleixlopez --search "biohub-0-948"` found the private kernel `aleixlopez/biohub-0-948-momentum-deepcenter-tta`, with `lastRunTime` reported as `2026-09-24T15:14:08.107000`. This list timestamp is not evidence that the run completed successfully or passed validation.
+- `kaggle kernels pull ... --metadata` retrieved the remote sidecar: `enable_gpu: true`, `machine_shape: NvidiaTeslaT4`, and the three expected dataset sources. The remote notebook still embeds `metadata.kaggle.isGpuEnabled: false`. The T4's actual visibility and the run's attached artifacts remain unverified.
+- Comparing the pulled remote notebook with the committed local notebook found source differences in cells 0, 1, and 6—the exact cells changed by commit `31ec907`. The remote Kaggle copy therefore does not contain the latest local provenance corrections.
+- `kaggle kernels files` returned an empty list. `kaggle kernels output` and `kaggle kernels status` returned HTTP 404 from the session-output/status endpoints, so the prior run's log, submission, and receipt could not be inspected through this CLI session.
+- A fresh `kaggle competitions submissions` query returned five records; none is the 0.948 candidate. The latest scored record remains submission `56132481` at `0.946`.
+- The referenced source slug `raykkretzschmar/biohub-bidirectional-primary-union13-diagnostic-v1` could not be verified: Kaggle denied `kernels.get` for that exact reference. A separately named harmonic-association notebook was readable, but its pulled source did not emit or validate a `bidirectional_blend_union13_receipt.json`. Do not treat either as the required promotion receipt.
+- A separate prior CV workspace contains raw training Zarr/GEFF data and a public-rule-control report, but targeted searches found no candidate OOF prediction arrays, model checkpoints, or promotion receipt there. Raw labels alone do not enable the paired 0.946-vs-0.948 comparison required by B1/B2.
+
+## Read-only status refresh — 2026-09-26 11:58 CEST
+
+- `kaggle competitions submissions biohub-cell-tracking-during-development --format json --page-size 20` returned five records. The latest scored record remains submission `56132481` at public score `0.946`; no `0.948` submission is present, and private scores were blank.
+- `kaggle kernels list --user aleixlopez --search biohub-0-948 --page-size 10 --format json` still lists `aleixlopez/biohub-0-948-momentum-deepcenter-tta` with `lastRunTime` `2026-09-24T15:14:08.107000`. This listing is not evidence that inference completed or produced a usable output.
+- Current endgame order, GPU classification, and user-approval boundaries are summarized in [`endgame_next_steps_and_blockers.md`](../endgame_next_steps_and_blockers.md). The immediate path is CPU-side provenance/evaluator work and locating genuine fold-excluded OOF artifacts; only then consider GPU inference.
+
+## CPU-only EMA characterization follow-up — 2026-09-26
+
+- Added `tests/test_kaggle_notebook_ema_relink.py`, which AST-extracts only `_position_um`, `motion_relink_edges`, and the relevant default settings. It does not execute notebook cells.
+- The synthetic cases verify velocity-based target selection and the EMA update on small trajectories. Focused result: **2 passed**. Full suite: **125 passed, 4 skipped**. `git diff --check`: **PASS**.
+- This is helper-level regression coverage only. It does not validate the Kaggle patch path, mounted model artifacts, OOF quality, leaderboard score, or promotion receipt.
 
 ## Findings and severity
 
-1. **High — Candidate quality gate is unsatisfied.** The notebook's own cell 6 report declares `candidate_unverified_quality`, requires a receipt with `promote=true`, says push/submit is forbidden until that condition, and has no validated receipt hash. The required receipt is absent locally. Do not push or submit this candidate until its required quality evidence is obtained and reviewed.
-2. **High — Accelerator metadata conflicts.** The sidecar requests GPU, but embedded notebook metadata says GPU disabled. Both staged versions contain the conflict. Determine which setting Kaggle uses before spending quota; do not assume the T4 is active solely from the sidecar or accelerator label.
-3. **High — Current candidate provenance is ambiguous.** The cell 6 report contains historical-looking configuration values that disagree with cell 0 and names a separate parent experiment. The notebook's score labels (`0.939`, `0.913`) do not match each other, and neither establishes a 0.948 result. Confirm whether this report belongs in this notebook and identify the authoritative candidate configuration.
-4. **Medium — Stale run diagnostics.** The printed `0.200` reverse-time weight conflicts with the actual, guarded `0.15` value; the cell 1 description of the model-level change also does not describe the only source-code change versus 0.946. This can mislead future run interpretation even if it does not alter the active inference configuration.
+1. **High — Internal candidate promotion gate has no identified producer and is only declarative.** Cell 6 writes `candidate_unverified_quality`, the receipt filename, `promote=true`, `FORBIDDEN_UNTIL_REQUIRED_CONDITION`, and a null receipt hash into a report; it does not load the file or block execution. No repository code generates or validates the named receipt. This is the notebook's internal gate, not an official Kaggle-issued file/rule. Treat the candidate as unpromoted; first define and run a genuine fold-disjoint comparison of the exact 0.946 parent and EMA candidate under the official metric, then make the local gate consume that actual evidence. Do not fabricate a receipt or relabel another experiment's promotion output.
+2. **High — Accelerator metadata conflicts.** The remote sidecar requests GPU/T4, but the embedded notebook metadata says GPU disabled; the same conflict is present in the local candidate. Although Kaggle reports a prior `lastRunTime`, its runtime status/logs are not retrievable here, so actual accelerator visibility remains unresolved. Verify it before spending quota; do not infer a working T4 from metadata alone.
+3. **High — Upstream source and remote runtime provenance remain unverified.** The local candidate's score/parent/config-report corrections are now in place, but the referenced upstream diagnostic source could not be verified, and the remote Kaggle copy predates those local corrections. The current allowlisted configuration block records declared environment values, not proof of actual runtime settings or loaded checkpoint hashes. Confirm the source attribution and runtime artifacts before syncing or running.
+4. **Resolved locally — Stale score/run diagnostics.** The prior `0.200` reverse-time weight, `0.913` baseline label, and incorrect association attribution were replaced by explicit unscored/EMA diagnostics. This corrects local text only; it is not validation evidence, and the old remote copy remains stale.
 5. **Medium — Config guard is narrow.** Only 8 of 45 cell-0 environment assignments are checked in cell 1. Several important declared options can drift without triggering that guard. The dynamic cell 11 manifest helps show resolved state but is diagnostic output, not a comprehensive expected-value assertion.
-6. **Low / validation gap — EMA code lacks notebook-specific synthetic regression tests.** The generic tracker tests do not call this notebook helper. Static AST validity does not cover candidate behaviors, Kaggle-only imports, or string-patch anchor matching.
-7. **No score conclusion.** The absence of local `.zarr` inputs, CV pack, and `.geff` predictions prevents a local paired CV run or CPU-only post-processing sweep. No claim of improvement over 0.946 is supported by this audit.
+6. **Low / validation gap — Basic synthetic helper coverage added; end-to-end behavior remains unvalidated.** `tests/test_kaggle_notebook_ema_relink.py` exercises the notebook EMA helper on synthetic trajectories, but does not cover Kaggle-only imports, dynamic patch anchors, mounted artifacts, or score quality.
+7. **No score conclusion.** The absence of local validation Zarr/OOF inputs and candidate prediction artifacts prevents a paired candidate CV run or CPU-only post-processing comparison. No claim of improvement over 0.946 is supported by this audit.
 
-## GPU-only checks still required
+## Pending runtime and local-validation checks
 
-Only after the provenance and readiness blockers above are resolved, and after the user authorizes the external action:
+### GPU/Kaggle checks — only after evidence gates and separate user approval
 
-1. Verify in Kaggle UI/runtime that the T4 is actually enabled and the three expected dataset versions are attached.
+1. After the receipt gate is legitimately satisfied, verify in Kaggle UI/runtime that the T4 is actually enabled and the three expected dataset versions are attached.
 2. Check that the exact upstream support-script patch anchors still match once, and that primary, secondary, and DeepCenter artifact manifests/checksums resolve as expected.
 3. Confirm the runtime manifest reports dual-seed weights found, bidirectional fusion at the intended value, and DeepCenter loaded with the expected checkpoint/epoch.
-4. Run the notebook only after any explicit quality gate is met; inspect its output schema/topology checks and runtime/error log.
-5. Run the mandatory local evaluation/paired-OFF validation if predictions and validation data become available; inspect per-dataset diagnostics before recommending a score change.
+4. Push/run only after the required receipt is obtained and reviewed; inspect output schema/topology checks and the runtime/error log. Do not use the remote pre-correction notebook as the candidate evidence.
+
+### CPU-capable paired evaluation — once genuine OOF artifacts exist
+
+Once valid fold-excluded predictions and labels are available, run the paired official-metric local evaluation and inspect per-dataset diagnostics. This is CPU-capable and does not itself require Kaggle authorization; generating missing neural predictions may require GPU.
 
 These checks require Kaggle execution and/or local competition validation data; they were not performed here.
 
 ## Readiness verdict and next action
 
-**BLOCKED ON PROVENANCE CONFIRMATION.** The sidecar and embedded accelerator flags disagree; the score/provenance labels are inconsistent; and the notebook's own quality-promotion record explicitly remains unverified with its required receipt absent. The next safe action is to confirm the intended experiment/configuration and satisfy the receipt gate, then separately decide whether to repair the notebook and request a GPU run. This audit does not authorize or perform a kernel push or competition submission.
+**BLOCKED ON FOLD-DISJOINT EVIDENCE AND RUNTIME READINESS.** The local score/provenance text was corrected, but the sidecar and embedded accelerator flags still disagree, the upstream source/remote runtime provenance remains unverified, and the declared receipt gate has no producer or executable validation. The next safe action is CPU-side: define a real paired fold-disjoint comparison and implement its fail-closed receipt path, then locate or generate matching held-out outputs from fold-excluded weights. Fresh neural predictions are likely to require GPU; scoring retained predictions does not. Resolve runtime configuration and verify an actual T4 only after the evidence path is valid. See [`endgame_next_steps_and_blockers.md`](../endgame_next_steps_and_blockers.md). This audit does not authorize or perform a kernel push or competition submission.

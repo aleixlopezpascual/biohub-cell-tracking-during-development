@@ -1,5 +1,7 @@
 # Local CV results
 
+> The recorded `public-rule-control-est-budget` result is a different, rule-based control—not OOF evidence for the 0.946-vs-EMA candidate. The current search found no matching fold-excluded candidate predictions/weights or receipt in the project and known prior CV workspace. See [`../endgame_next_steps_and_blockers.md`](../endgame_next_steps_and_blockers.md) for the missing artifacts and next validation steps.
+
 ## public-rule-control-est-budget
 
 | Metric | Fold A (44b6) | Fold B (6bba) | Equal-weight CV |

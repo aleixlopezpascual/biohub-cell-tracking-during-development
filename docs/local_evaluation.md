@@ -1,5 +1,7 @@
 # Local evaluation before Kaggle submission
 
+> **Current candidate status:** the 0.948 EMA notebook has no verified paired fold-disjoint evaluation or receipt producer yet, and no matching candidate OOF predictions were found in the searched project/CV paths. This generic CSV scorer can evaluate predictions once produced; it does not generate model predictions or validate the notebook's declared receipt by itself. Follow [`endgame_next_steps_and_blockers.md`](endgame_next_steps_and_blockers.md) for the exact current gate and CPU/GPU split.
+
 Every candidate must be evaluated locally before submission. The public leaderboard is useful feedback, but participants found it can be optimistic or misleading because public test volumes appear to include train-like twins and because sparse ground truth makes single aggregate scores hard to interpret.
 
 ## ⚠️ Crucial Validation Pitfalls & Kaggle Secrets

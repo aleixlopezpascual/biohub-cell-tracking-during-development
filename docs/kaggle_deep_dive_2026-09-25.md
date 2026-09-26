@@ -2,21 +2,23 @@
 
 **Research snapshot:** 2026-09-25, 12:26–12:42 UTC. Competition deadline recorded by the project: 2026-09-29 23:59 UTC. This is a read-only research report; no Kaggle kernel was run or submitted during this review.
 
+> **Current execution status:** this file preserves the dated public-notebook/leaderboard research. Its leaderboard ranks and medal bands are not live. The current execution plan is [`endgame_next_steps_and_blockers.md`](endgame_next_steps_and_blockers.md): the 0.948 candidate remains unscored, paired fold-disjoint predictions and a real receipt path are missing, and a Kaggle run/submission needs separate approval.
+
 ## Executive answer
 
-The main thing we were missing was not another named post-processing trick: it was an up-to-date, rank-aware view of what a medal actually requires, plus a stricter distinction between **a notebook's score claim** and **a reproducible result**. The current best submission is not in a medal position on the public board, and the planned `0.948` candidate—if it scores exactly that—would still be outside today's bronze cutoff. The candidate is nevertheless the best low-cost next move because it is already staged and adds EMA motion relinking to an otherwise strong, clean inference stack.
+At the September 25 snapshot, the best verified submission was not in the public medal range, and a hypothetical `0.948` score would still have been outside that snapshot's bronze cutoff. The staged candidate was then considered a low-cost hypothesis because it changed motion relinking, but the later CPU preflight found it was not ready to run or promote: provenance/configuration and the missing fold-disjoint evidence/receipt path must be resolved first. The candidate name remains unscored, not a result.
 
 The public notebooks at approximately `0.947–0.948` are mostly variations of the same learned 3D detector + learned edge scorer + graph solver family. Our `0.946`/staged `0.948` path already contains most of the strongest shared ingredients: edge-feature TTA, dual-seed support, bidirectional harmonic association, DeepCenter veto, physically constrained division repair, density-aware gap logic, and short-track rescue. Re-copying those components is unlikely to create a meaningful new edge. The clearest untested ideas in the inspected newer code are **relative-rank / mutual-best association**, **neighborhood-flow motion**, and a stronger **per-video node-count stability audit**; none has yet shown a verified gain over our baseline in the public notebooks we checked.
 
 A medal is possible only if the final private ranking moves substantially. On the captured public snapshot, the best submission was rank **1,221 / 3,899** at **0.946** (31.32% of teams). Kaggle medals for competitions with at least 1,000 teams go to the top 10% (bronze), top 5% (silver), and top 10 plus 0.2% increments (gold); for 3,899 teams that is 389 bronze, 194 silver, and 17 gold places. The displayed public bronze boundary was in the `0.953` band. A public score of `0.948` would have landed around ranks 504–601, still outside bronze. Kaggle says this board uses about 29% of the test data and the final ranking uses the other 71%, so public rank is a noisy proxy, not a medal guarantee.[1][4]
 
-> **Correction:** older project text describing `0.946` as a “Solid Silver Medal Standing” is not true for the current standings. See the dated correction in `docs/endgame_status_and_strategy.md` and this report's snapshot above.
+> **Correction:** older project text describing `0.946` as a “Solid Silver Medal Standing” was not supported by the September 25 standings snapshot. The linked rank figures are dated evidence, not current standings. See the archived correction in `docs/endgame_status_and_strategy.md` and the current status document before making a live claim.
 
 ## 1. What the current leaderboard means
 
 The official public leaderboard export captured at `2026-09-25T12:26:30` contained 3,899 teams. It placed our `aleixlopez` team at rank 1,221 with the recorded `0.946` submission. The displayed `0.946` band spans ranks 1,203–1,358. The first displayed `0.953` score is around the bronze cutoff, but that rounded score band crosses the cutoff; treat `0.953` as the *boundary*, not as a guaranteed medal score. A more realistic public-buffer target would be rank ≤170 (about `0.954` on this snapshot), safely inside today's top-5% public band, while recognizing that the final 71% can reorder teams substantially. These are snapshot ranks, not final results.[1][4]
 
-The project’s planned `biohub-0-948-momentum-deepcenter-tta` has **not** been run or scored in this review. Its `0.948` name is a target, not evidence of a result. If a future submission scored `0.948`, the current public ranking distribution suggests it would improve our position but still not reach the public bronze line. The remaining medal gap is therefore not “one more tiny threshold sweep.”
+The project’s `biohub-0-948-momentum-deepcenter-tta` had **not** been run or scored in this research review. Its `0.948` name is a target, not evidence of a result. In the September 25 leaderboard snapshot, a hypothetical score of `0.948` would have improved our position but still missed the public bronze line. That rank estimate is historical; refresh the public leaderboard before any current-rank or medal claim. The remaining medal gap is therefore not “one more tiny threshold sweep.”
 
 Kaggle's [official overview](https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/overview) labels this a Points & Medals competition. The rules permit up to two final submissions, not a requirement to choose two.[3] Reserve the second slot for a distinct candidate only if it has credible validation.[3][4]
 
@@ -85,11 +87,11 @@ The discussion describes EMA projection of an individual track's velocity, which
 
 ### Division-specific model / synthetic supervision
 
-A competitor released an 18.5 GB CC0 synthetic microscopy dataset with 165,267 labelled divisions across 4,056,226 nodes. This is a potentially valuable long-term way to learn division evidence, because the competition annotations are sparse. A public conditional synthetic third-model notebook currently reports `0.946`, however, so the existence of synthetic data does not by itself demonstrate a score gain. With the GPU unavailable and only a few days left, training from scratch is a post-competition or quota-reset experiment—not the first endgame task. External data must remain public/equally accessible under the competition rules.[3][12][18]
+A competitor released an 18.5 GB CC0 synthetic microscopy dataset with 165,267 labelled divisions across 4,056,226 nodes. This is a potentially valuable long-term way to learn division evidence, because the competition annotations are sparse. A public conditional synthetic third-model notebook reported `0.946` at the time reviewed, so the existence of synthetic data does not by itself demonstrate a score gain. At the time of the September 25 research snapshot, GPU access was reported unavailable and only a few days remained; training from scratch was a post-competition direction, not an endgame action. External data must remain public/equally accessible under the competition rules.[3][12][18]
 
 ### Multi-scale DoG detection
 
-A simple rule-based notebook reports that multi-scale Difference-of-Gaussians increased its own score from `0.786` to `0.826` (+0.040). That is a useful low-cost detector baseline and sanity check, but it is far below the current `0.946–0.948` learned-model regime. Only revisit it as a high-recall candidate source if local held-out data shows cells our neural detector misses and the node-count penalty remains controlled.[8]
+A simple rule-based notebook reports that multi-scale Difference-of-Gaussians increased its own score from `0.786` to `0.826` (+0.040). That is a useful low-cost detector baseline and sanity check, but it is far below the verified `0.946` baseline; `0.948` remains only the name of an unscored candidate. Only revisit DoG as a high-recall candidate source if local held-out data shows cells our neural detector misses and the node-count penalty remains controlled.[8]
 
 ### Short-track rescue is not a free win
 
@@ -97,13 +99,9 @@ One clean notebook tested a conservative rescue of exactly five-node tracks, req
 
 ## 5. What we should do now
 
-1. Clear the `0.948` provenance/quality-gate blocker and inspect the resolved runtime manifest (which actual weights loaded, which vetoes are active, whether any fallback occurred). The candidate should fail closed rather than silently run as a single-seed or no-DeepCenter variant.
-2. If GPU access returns, run the staged inference as the first low-training-cost candidate. Do not call it `0.948` until Kaggle returns a score. A score around `0.948` would still be short of today's bronze boundary.
-3. Before any further public submission, require one truly independent held-out comparison. The workspace currently contains no `.zarr` directories under the project and no cached prediction graphs, so this CPU-only review could not score new post-processing ideas.
-4. If prediction artifacts become available, prioritize the metric-aligned node-count stability audit, then a single relative-rank/mutual-best A/B; only after that test neighborhood-flow. Keep all tests paired and per-embryo.
-5. Select at most two final submissions: the best proven, robust candidate and a second materially distinct candidate only if it is validated. Do not choose unvalidated “aggressive” versus “conservative” threshold variants just to fill both slots.[3]
+This section is retained as the research-time recommendation, not a current run checklist. The current ordering is: (1) implement a fail-closed paired-OOF evaluator/receipt path and resolve provenance; (2) locate or generate genuine fold-excluded parent/EMA outputs; (3) score them on CPU; and (4) only after the evidence/readiness gates and separate user approval, perform GPU/T4 hidden-test inference. B1 then B2 require retained OOF artifacts; B3 is conditional. The exact current blocker/equipment matrix is maintained in [`endgame_next_steps_and_blockers.md`](endgame_next_steps_and_blockers.md). A test-set run is not a substitute for independent held-out validation.
 
-**Bottom line:** We already have a credible public-notebook-level inference stack. A likely `+0.002` candidate improvement is helpful but not enough to establish a medal path. The most defensible route is to verify that run, improve generalization with the right held-out validation, and spend the last GPU time on one orthogonal experiment—not a blind sweep or a metric exploit.
+**Bottom line (research snapshot):** the review identified plausible ideas, not measured local gains. No score improvement is supported for the staged candidate. Use the canonical current status document for today's next action; do not infer a medal path from a candidate name or stale public-board snapshot.
 
 ## Internal project references
 

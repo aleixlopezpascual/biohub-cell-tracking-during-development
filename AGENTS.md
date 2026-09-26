@@ -143,7 +143,7 @@ Current validation command:
 PYTHONPATH=src python3 -m pytest -q
 ```
 
-Expected current baseline: `54 passed, 1 skipped` in this environment. The skip is torch-dependent when torch is unavailable.
+Most recently verified baseline (2026-09-26, including the staged EMA helper characterization tests): `125 passed, 4 skipped`. Refresh this count when the test suite changes; skips are optional-dependency/environment dependent.
 
 ### Linting and packaging
 

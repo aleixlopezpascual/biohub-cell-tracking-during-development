@@ -1,5 +1,7 @@
 # Kaggle Cutting-Edge Insights & Strategy
 
+> **Historical strategy note, not the active endgame checklist.** Its model and CV observations are preserved for reference; its suggested next actions are not current execution instructions. In particular, do not start a new GPU run from this page or infer that the `0.90325` local CV benchmark validates the staged 0.948 EMA candidate. See [`endgame_next_steps_and_blockers.md`](endgame_next_steps_and_blockers.md) for current blockers, required evidence, and the CPU/GPU split.
+
 This document logs our research findings regarding the advanced **SGT-DFO (Spatiotemporal Graph Transformer with Differentiable Graph-Flow Optimization)** framework and **Kaiwalya Raut's 0.901 V4 baseline**, answering our core strategic questions for the Biohub Cell Tracking competition.
 
 ---
@@ -29,7 +31,7 @@ We can implement these cutting-edge insights directly into our current modular r
 
 #### A. Activate and Calibrate Sister Symmetry Gating
 *   *The Concept:* Divisions must satisfy biological symmetries (the two daughter cells should have similar sizes, migration velocities, and temporal alignment). Linking deforming cells that do not share these symmetries creates massive false divisions and ruins scores.
-*   *Implementation:* Our local tracker (`src/biohub_tracking/tracking/hungarian.py`) **already natively implements a `sister_symmetry_tau` gate!** 
+*   *Implementation:* Our local tracker (`src/biohub_tracking/tracking/hungarian.py`) **already natively implements a `sister_symmetry_tau` gate!**
 *   *Action:* We can activate `use_sister_symmetry_gate: True` in our configuration and calibrate `sister_symmetry_tau` directly against our newly secured `0.90325` OOF CV to filter out false-positive branches.
 
 #### B. Handle the SCIP/Gurobi Solver Licensing Bottleneck

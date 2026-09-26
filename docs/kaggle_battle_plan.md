@@ -1,53 +1,7 @@
-# Kaggle Gold-Zone Battle Plan
+# Archived: Kaggle Gold-Zone Battle Plan
 
-This document serves as your concrete, step-by-step instructions for what to run and configure the moment your weekly Kaggle GPU quota resets. 
+> **Do not execute this plan.** It was written before the 0.948 candidate's provenance and validation blockers were established and contains stale GPU-reset assumptions, unsupported score expectations, and superseded training steps. The active plan is [`endgame_next_steps_and_blockers.md`](endgame_next_steps_and_blockers.md); the ordered experiments are in [`competition_idea_backlog.md`](competition_idea_backlog.md).
 
-> **Status correction (2026-09-25):** This is a historical plan, not an execution authorization. It has not established that its proposed run will beat any public notebook or secure a medal. Do not resume `temporal-pu-a` from epoch 10 until its recorded `0.0079` OOF score / `0.017` node recall is diagnosed. The current ordered queue and GPU/provenance gate are in `docs/competition_idea_backlog.md`.
+This document is retained only to explain the prior direction. It proposed running the public Gold OOF workflow, restarting custom training, and later ensembling checkpoints. Those actions were not shown to validate the staged EMA candidate and are not the current competition endgame. In particular, do not resume `temporal-pu-a` from epoch 10: its recorded OOF score (`0.0079`) and node recall (`0.017`) must be diagnosed before any new training allocation.
 
-The intended experiment was to combine custom checkpoints with **Feature-Level TTA**, **Bidirectional Tracking**, and **Multi-Model Ensembling**. This has not been validated as a result that outclasses public notebooks.
-
----
-
-## 🚀 Step 1: Harvest the Upgraded Baseline Score (Approx. 15 mins)
-
-Before training any custom models, we want to evaluate the clean public 50-epoch reference checkpoint with our newly integrated overlays to see our peak baseline score.
-
-1.  Go to your **Kaggle Account** -> **Notebooks**.
-2.  Open your evaluation kernel: **`aleixlopez/biohub-gold-public-oof`** (Version 10).
-3.  Ensure your attached dataset inputs are:
-    *   `aleixlopez/biohub-gold-training-runner` (Our latest codebase)
-    *   `dariushafshar/biohub-local-cv-pack` (Local CV splits)
-    *   `pilkwang/biohub-tracking-support-pack-50ep-v1` (Official weights & dependencies)
-4.  Click **Run** (Verify accelerator is set to **GPU T4 x2**).
-5.  **What it does:** It runs our recursive, PyTorch-native GPU-accelerated TTA and Bidirectional Tracking, saving the results under candidate `public-50ep-overlays` at threshold `0.96`.
-6.  **Expected Output:** Once complete, check the notebook logs. This is expected to boost your Fold 0 score from `0.897` up toward `0.94+` on your local holdout!
-
----
-
-## 🏋️‍♂️ Step 2: Custom 50-Epoch Disjoint Folds — BLOCKED
-
-**Do not resume `temporal-pu-a` from epoch 10 using the instructions in this historical plan.** The experiment ledger records an OOF score of `0.0079` and node recall of `0.017`; diagnose that result before spending another GPU allocation. The current endgame priority is the staged inference candidate in `docs/competition_idea_backlog.md`, not scratch-training this checkpoint.
-
----
-
-## 🏆 Step 3: Multi-Model Checkpoint Ensembling & Submission
-
-Once your custom checkpoints have finished training, we can ensemble them with the public weights and apply our overlays to generate your peak leaderboard submission.
-
-1.  **Configure your Submission Kernel:** Open your final submission notebook on Kaggle.
-2.  **Attach inputs:** Attach your newly trained checkpoints dataset along with `biohub-gold-training-runner` and the support pack.
-3.  **Setup Ensembled Predictor:**
-    *   Load your custom Fold A & Fold B checkpoints along with the public `split_0` weights.
-    *   Configure our ensembling logic in your prediction script:
-        ```python
-        # List of checkpoints to ensemble
-        detector_weights = [
-            "/kaggle/input/your-dataset/fold_a_detector.pth",
-            "/kaggle/input/your-dataset/fold_b_detector.pth",
-            "/kaggle/input/biohub-tracking-support-pack-50ep-v1/.../split_0/edge_predictor_best.pth"
-        ]
-        ```
-4.  **Execute Overlay Prediction:**
-    *   Run predictions with both **Edge-Feature TTA** and **Bidirectional Tracking** enabled.
-    *   Use the community-optimal threshold of **`0.96`**.
-5.  **Submit to Leaderboard:** Submit only after the candidate passes fold-disjoint validation and the user explicitly approves; no medal standing is guaranteed.
+No kernel push/run or competition submission is authorized here. The current next action is CPU-side: define a real fail-closed paired fold-disjoint evaluation/receipt path and locate the required OOF artifacts. Fresh model predictions may require GPU; a Kaggle inference run and a competition submission each require separate explicit approval after readiness checks.

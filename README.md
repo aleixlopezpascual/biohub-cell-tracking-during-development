@@ -8,6 +8,10 @@ official competition metrics, and a deterministic submission exporter.
 Metric behavior follows the official reference:
 https://github.com/royerlab/kaggle-cell-tracking-competition/blob/main/metrics.md
 
+## Competition endgame status
+
+For the current verified Biohub score, staged-candidate blockers, next action, and CPU/GPU requirements, start with [`docs/endgame_next_steps_and_blockers.md`](docs/endgame_next_steps_and_blockers.md). The documentation index is [`docs/README.md`](docs/README.md). Historical leaderboard snapshots and archived quota-reset plans are explicitly dated and should not be treated as live status or authorization to run/submit.
+
 ## Install
 
 ```bash
@@ -122,6 +126,8 @@ dataset; `torch`-dependent tests are skipped automatically when the `torch`
 extra isn't installed.
 
 ## Local validation before submission
+
+Use [`docs/local_evaluation.md`](docs/local_evaluation.md) for the generic evaluation workflow. For the staged 0.948 candidate specifically, no valid paired fold-disjoint evaluation/receipt currently exists; see the current endgame status document before attempting promotion or a Kaggle run.
 
 ## Recommended competitive baseline
 

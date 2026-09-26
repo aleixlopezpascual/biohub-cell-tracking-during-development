@@ -1,13 +1,14 @@
 # Biohub endgame experiment backlog
 
-**Created:** 2026-09-25. **Competition deadline:** 2026-09-29 23:59 UTC (about 4 days 11 hours remained at the research snapshot). This is an ordered experiment queue, not a claim that any unrun idea improves the score. No Kaggle kernel was run or submitted as part of creating it.
+**Created:** 2026-09-25. **Research-snapshot deadline:** 2026-09-29 23:59 UTC (about 4 days 11 hours remained at that snapshot). This is an ordered experiment queue, not a claim that any unrun idea improves the score. No Kaggle kernel was run or submitted as part of creating it. **For live blockers, compute requirements, and the immediate action list, use [`endgame_next_steps_and_blockers.md`](endgame_next_steps_and_blockers.md), the current source of truth.**
 
 ## Current constraints and target
 
-- User reports GPU access/quota is not currently available; I did not query Kaggle's live quota state.
-- The project workspace has no `.zarr` directories or cached prediction graphs, so we cannot honestly score new inference ideas in this CPU-only state.
-- Current best public score: `0.946`, submission `56132481`, public rank `1,221 / 3,899` in the 2026-09-25 leaderboard export. Current bronze cutoff is approximately rank 389; the displayed boundary score is `0.953`. Aim for rank ≤170 / about `0.954` on the current public board for a buffer, but final medals depend on the private 71% split.[1][4]
-- A candidate scoring exactly `0.948` would currently rank around 504–601, so the staged `0.948` run is useful progress but not a medal result.
+- A read-only Kaggle submission query at `2026-09-26 11:58 CEST` still showed `0.946` (submission `56132481`) as the latest scored result; no `0.948` submission exists. The candidate kernel listing's `lastRunTime` is not proof of a successful run/output.
+- GPU was previously reported unavailable; live quota/GPU availability was not verified. The metadata conflict and required T4 check are tracked in the current endgame status document.
+- The project and known prior CV workspace searches found no local validation Zarrs or matching candidate OOF predictions/graphs/weights. Score comparisons and B1/B2 therefore remain blocked until valid artifacts are located or generated.
+- Rank `1,221 / 3,899`, the approximate bronze boundary, and the hypothetical `0.948` rank are from the dated `2026-09-25` public-board snapshot only. Do not describe them as current standings; refresh the leaderboard before any live rank/medal claim.[1][4]
+- The staged candidate's `0.948` name is not evidence of a score. Its paired fold-disjoint validation and receipt path do not yet exist.
 - Keep experiment outcomes in `results/local_cv/experiments.csv` and `results/kaggle_lb/submissions.csv`; this document is only the ordered idea backlog.
 
 ## Promotion gate for every candidate
@@ -22,21 +23,25 @@
 
 ### B0 — Resolve and run the already-staged `0.948` inference candidate
 
-**Priority:** P0 — first if compute becomes available.<br>
-**Status:** Static audit complete; blocked on provenance/quality-gate receipt and GPU.
+**Priority:** P0 — unblock first; CPU preparation can proceed without GPU.<br>
+**Status:** Static audit, read-only Kaggle metadata check, and two CPU-only EMA helper characterization tests complete (2026-09-26). Still blocked because the notebook names `bidirectional_blend_union13_receipt.json` but the repository contains no generator or validator for it. This is a notebook-declared internal gate, not a Kaggle-issued file or competition rule; it must be backed by a genuine paired fold-disjoint evaluation artifact, not recreated by hand. The synthetic tests do not measure score or satisfy promotion. The private Kaggle copy last reports a run on 2026-09-24 but predates the local provenance correction; its outputs were unavailable, and there is no 0.948 submission record.
+**Compute:** Provenance review and receipt/evaluator implementation are CPU-only. Paired scoring is CPU-only once valid OOF outputs exist; generating missing neural predictions is likely GPU-dependent. Staged Kaggle inference requires a verified GPU/T4 runtime. See the current endgame status document for blockers and approval gates.
 **Hypothesis:** EMA momentum relinking improves identity continuity on crossings and fast motion over the proven `0.946` candidate at low training cost. DeepCenter is already present in both notebooks; it is not the differentiating change.
 
 **Work:**
-- Resolve the missing receipt/provenance blocker in `docs/kernel_audits/0948_cpu_preflight.md`.
-- Before a run, confirm the exact primary/secondary weight files and hashes, DeepCenter checkpoint/epoch, active flags, and that the notebook fails rather than silently falling back to one seed or an unloaded veto.
-- If GPU is available, run hidden-test inference and inspect the produced file and runtime manifest. Compare the clean candidate against the baseline; do not assume the score from the folder name.
+- Define and implement a fail-closed paired-evaluation artifact/validator for the 0.946 parent and EMA candidate on identical fold-disjoint predictions using the official metric; update the local notebook gate to consume that real evidence. The existing notebook report only declares a receipt requirement; it does not generate, read, or validate the named file. The artifact is an internal quality gate, not a Kaggle-issued file.
+- Locate or generate fold-excluded model outputs and their split/weight provenance. Public weights trained on the evaluation movies are not held-out evidence for those movies. If valid OOF predictions already exist, the comparison/scoring step can run on CPU; otherwise fresh neural inference is likely to need GPU.
+- Do not substitute the separate `gold_oof_runner`'s `promotion.json`: that runner evaluates a different training candidate and does not validate this EMA change.
+- Confirm the locally corrected provenance report matches the intended runtime config; reconcile sidecar/embedded GPU flags, primary/secondary weight hashes, DeepCenter checkpoint/epoch, active flags, and fail-closed fallback behavior before any Kaggle run. The Kaggle remote copy is stale and the referenced upstream source remains unverified.
+- Only after validation/readiness and separate user approval, run hidden-test inference and inspect the submission schema/topology, runtime manifest, loaded artifacts, and fallback state. This GPU test-set inference is distinct from the fold-disjoint promotion evaluation.
 
-**Pass:** correct artifacts loaded, no exploit rows or fallback, valid submission schema/coordinates, runtime safely under the deadline, and an actual Kaggle score returned after the user approves submission. This is not expected to reach bronze if it scores only `0.948`.
+**Pass:** The fold-disjoint paired evaluation independently meets the predeclared promotion gate and emits verifiable provenance; then the separately authorized GPU inference loads the intended artifacts with no fallback/exploit rows and produces a valid submission. Log only a score actually read back from Kaggle. A `0.948`-named candidate is not presumed to score that value.
 
 ### B1 — Metric-aligned per-video node-count stability audit
 
 **Priority:** P1 — best diagnostic before changing more knobs.<br>
 **Status:** Blocked on fold-held-out prediction artifacts. The current notebook already contains node-ratio diagnostics; use those rather than building duplicate instrumentation.
+**Compute:** CPU for paired per-video analysis when matching fold-held-out outputs and labels exist; GPU likely only if neural predictions must first be generated.
 **Hypothesis:** Changes that subtly alter retained-node counts can move the score even when offline edge Jaccard improves. One competitor reported a `+0.0011` offline edge change becoming a `-0.005` public change, with node-count shifts implicated; another report says a four-node change on one video was enough to matter. These are cautionary observations, not a universal law. [Discussion #742266](https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/742266)
 
 **Work:** For the same held-out movies, compare `0.946` and `0.948` predictions per movie: predicted/estimated node ratio, unmatched duplicates, edge TP/FP/FN, divisions, and score. Check the official coarse `T_true` adjustment; do not force every movie to an estimated exact count.[5]
@@ -47,6 +52,7 @@
 
 **Priority:** P1 — first genuinely orthogonal association change, only after B1.<br>
 **Status:** Not implemented in the staged candidate; blocked on OOF edge predictions.
+**Compute:** CPU for edge rescoring/evaluation on cached OOF scores; GPU likely if those model outputs must be regenerated.
 **Hypothesis:** Prefer an edge that is best in both the source row and target column, with a bounded penalty for non-mutual edges. The public [LB exploration E — mutual-best association notebook](https://www.kaggle.com/code/yudaiyamauchi/lb-exploration-e-mutual-best-association) freezes the rest of the pipeline and uses beta `0.25`; it supplies an isolated test design but no public candidate score. The separate density-rank notebook combines beta `0.12` with density adaptation and DivNet and displays `0.944`, so it is not proof that mutual-best alone beats our baseline.[17]
 
 **Work:** Keep detections, candidate-edge sets, and post-processing fixed. Compare the current harmonic score with the isolated `mutual_best` beta `0.25` configuration on the same held-out predictions. Do not sweep extra beta values or tune thresholds in the same run.
@@ -57,6 +63,7 @@
 
 **Priority:** P2 — only if the candidate still fails on crossings/fast-moving clusters.<br>
 **Status:** Not implemented; no OOF graph/image cache available.
+**Compute:** CPU for the flow/post-processing comparison on cached clips/graphs; GPU only if neural detections/edge predictions need regeneration.
 **Hypothesis:** A neighborhood-flow estimate can predict motion through a short occlusion where an individual track's EMA velocity is stale. A public notebook exposes `seed` flow mode with `k=12`, radius `40 µm`, and additional gates; it is bundled with other changes, so its score does not isolate flow. This is complementary to—not a replacement automatically justified for—the candidate's EMA.[19]
 
 **Work:** Evaluate a flow override on a predeclared hard subset of held-out clips. Keep detection/node selection fixed, record identity switches and edge FN/FP, and compare to EMA alone.
@@ -67,6 +74,7 @@
 
 **Priority:** P3 — optional if a pretrained artifact is already attachable and legally reusable.<br>
 **Status:** Not in the staged candidate; public conditional third-model notebook reports `0.946`, so upside is uncertain.[18]
+**Compute:** Do not train a new verifier for this deadline. Inference compute depends on the available model and may require GPU; first verify its license, checkpoint, and offline runtime.
 
 **Work:** Gate only ambiguous division candidates with a learned mitosis score; do not union every predicted node from a third detector. Verify dataset/model license and that the artifact is available offline in the Kaggle notebook.
 
@@ -76,6 +84,7 @@
 
 **Priority:** P4 — low priority against the current learned detector.<br>
 **Status:** Not wired into the candidate; blocked on image/OOF validation.
+**Compute:** CPU for DoG proposals and filtering; valid validation images/labels are still required to measure impact.
 **Hypothesis:** DoG peaks may recover missed dim cells. A public rule-based experiment improved its own score from `0.786` to `0.826`, but that is not evidence of a gain over `0.946`.[8]
 
 **Work:** Use DoG only to propose candidates that are then deduplicated and filtered by the learned detector/edge model. Track node-count ratio and duplicate distance.
@@ -86,6 +95,7 @@
 
 **Priority:** P5 — high long-term upside; defer until after this competition unless GPU returns with ample time and a complete training/validation path.<br>
 **Status:** Not started.
+**Compute:** GPU required for practical model training; explicitly post-competition work.
 **Hypothesis:** The released CC0 synthetic dataset provides substantially more mitosis labels than the competition annotations and could support a more robust division verifier or detector.[3][12]
 
 **Work after the competition:** train fold-disjoint models, use synthetic-to-real validation, and verify external data provenance. The 18.5 GB dataset and domain gap make this unsuitable as a last-minute unvalidated training run.
@@ -100,10 +110,11 @@
 
 ## Endgame order of operations
 
-1. With no GPU: finish provenance/receipt checks, audit local score logs, and make no score claim for an unrun idea.
-2. When GPU is genuinely available: clear B0 and run only the staged inference candidate first.
-3. If local OOF predictions become available: B1, then one B2 ablation, then B3 only if the failure cases justify it.
-4. Submit only after explicit user approval. Keep the `0.946` scored submission as an anchor; use the second final-submission slot only for a validated, materially distinct candidate. No submission has been made as part of this backlog.
+1. Start with the CPU-side fail-closed paired-OOF evaluator/receipt path and provenance/config reconciliation; do not assume GPU reset/quota availability.
+2. Locate valid fold-excluded predictions/weights or determine what GPU work is needed to generate them. Run the paired official-metric evaluation before relying on the candidate.
+3. Only after that evidence and readiness pass, ask for separate authorization for T4 inference. The hidden-test run is not the fold-disjoint quality gate.
+4. If OOF predictions are available, do B1, then one B2 ablation, then B3 only if the failures justify it. Defer B4/B5 unless time and artifacts make a focused test feasible; B6 is post-competition.
+5. Submit only after separate explicit user approval. Keep the `0.946` scored submission as an anchor; use the second final-submission slot only for a validated, materially distinct candidate. No submission has been made as part of this backlog.
 
 ## Related records
 

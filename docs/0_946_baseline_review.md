@@ -2,6 +2,8 @@
 
 Review and documentation of our tuned public leaderboard baseline notebook `aleixlopez/biohub-0-946-edge-feature-tta-tuned` (LB 0.946, exploit-free). Medal standing is dynamic: as of the 2026-09-25 snapshot this submission is rank 1,221/3,899, outside the current top-10% bronze cutoff; see `docs/kaggle_deep_dive_2026-09-25.md`.
 
+> This is a historical review of the proven 0.946 anchor, not a live leaderboard report or an instruction to submit. The staged 0.948 candidate remains unscored; use [`endgame_next_steps_and_blockers.md`](endgame_next_steps_and_blockers.md) for its current readiness and validation status. Refresh the public board before making current rank/medal claims.
+
 ## Core Insights & Methodology
 
 This baseline represents the absolute pinnacle of our public-notebook-derived lineage. It achieves its outstanding **0.946 Public LB** score completely genuinely, with zero metric exploits or synthetic node injections. It introduces a massive technical breakthrough over standard Test-Time Augmentation (TTA) pipelines:
@@ -27,7 +29,7 @@ To push the performance even further, the notebook blends robust features from a
 ### 3. Our Programmatic Tuning (The 0.96 Threshold Swap)
 The original public notebook (`flexonafft/biohub-lineage-forge-precision-tracking`) was published with the default threshold of `0.965`.
 
-By analyzing sweeps from the `busyaprime` baseline, we proved that `0.965` sat one step past the optimal curve, and that lowering it to `0.96` provided a clean, positive-sum leaderboard boost. 
+By analyzing sweeps from the `busyaprime` baseline, we proved that `0.965` sat one step past the optimal curve, and that lowering it to `0.96` provided a clean, positive-sum leaderboard boost.
 
 We wrote a programmatic patch script (`scripts/patch_notebook.py`) to swap the threshold value to **`0.96`** in:
 * **Cell 0:** The active environment configuration cell.

@@ -2,6 +2,8 @@
 
 This document serves as the permanent record of our breakthroughs, insights, and results achieved on September 14, 2026, establishing a world-class learned-model Out-Of-Fold (OOF) CV reference and validating our training pipeline on GPUs.
 
+> **Historical training result:** the `0.90325` score below belongs to the public 50-epoch reference checkpoint and its September 14 fold-holdout experiment. It is not evidence for the 0.946-parent vs EMA candidate, and this document does not authorize a new training run. Current competition blockers and the CPU/GPU action order are in [`endgame_next_steps_and_blockers.md`](endgame_next_steps_and_blockers.md).
+
 ---
 
 ## 🔑 1. Critical Competitive Insights (Kaggle Research Sweep)
@@ -35,7 +37,7 @@ We authored `scripts/overfit_detector_sanity.py` and its associated automated te
 
 ## 🌟 3. Securing the Gold-Standard OOF CV Reference
 
-We designed and launched a disjoint sequential evaluation kernel (`aleixlopez/biohub-gold-public-oof`) on Kaggle to run the clean public 50-epoch checkpoint under our exact offline scorer across **both prefix-holdout splits** (Fold 0/Holdout A and Fold 1/Holdout B). 
+We designed and launched a disjoint sequential evaluation kernel (`aleixlopez/biohub-gold-public-oof`) on Kaggle to run the clean public 50-epoch checkpoint under our exact offline scorer across **both prefix-holdout splits** (Fold 0/Holdout A and Fold 1/Holdout B).
 
 The kernel successfully bypassed all local environment boundaries, installed offline wheels, resolved the splits, bypassed internal epoch validations, and completed with **100% success**.
 
