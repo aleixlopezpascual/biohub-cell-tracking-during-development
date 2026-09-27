@@ -14,7 +14,11 @@ from types import SimpleNamespace
 from typing import Any
 
 import numpy as np
+import pytest
 from scipy.optimize import linear_sum_assignment
+
+from biohub_tracking.tracking.graph import Detection
+from biohub_tracking.tracking.motion_relink import MotionRelinkConfig, motion_relink
 
 NOTEBOOK_PATH = (
     Path(__file__).resolve().parents[1]
@@ -156,3 +160,53 @@ def test_motion_relink_ema_update_influences_next_frame_assignment() -> None:
         (2, 3),
         (3, 5),
     ]
+
+
+def test_core_motion_relink_matches_notebook_helper() -> None:
+    notebook_relink, voxel_scale = _load_motion_relinker()
+    nodes = {
+        1: _node_at_um(0, 0.0, voxel_scale[2]),
+        2: _node_at_um(1, 10.0, voxel_scale[2]),
+        3: _node_at_um(2, 11.0, voxel_scale[2]),
+        4: _node_at_um(2, 14.0, voxel_scale[2]),
+    }
+    learned_edge_probs = {(1, 2): 0.2, (2, 3): 0.9, (2, 4): 0.0}
+    notebook_stats = _empty_motion_stats()
+    expected = notebook_relink(nodes, notebook_stats, learned_edge_probs)
+    detections = {
+        node_id: Detection(
+            id=node_id,
+            frame=int(node["t"]),
+            z=float(node["z"]) * voxel_scale[0],
+            y=float(node["y"]) * voxel_scale[1],
+            x=float(node["x"]) * voxel_scale[2],
+        )
+        for node_id, node in nodes.items()
+    }
+
+    actual = motion_relink(
+        detections,
+        learned_edge_probs,
+        MotionRelinkConfig(learned_edge_bonus=0.75),
+    )
+
+    expected_structure = [
+        (int(edge["source_id"]), int(edge["target_id"]), str(edge["motion_pass"]))
+        for edge in expected
+    ]
+    assert [(edge.source_id, edge.target_id, edge.pass_name) for edge in actual.edges] == (
+        expected_structure
+    )
+    expected_values = [
+        (float(edge["edge_prob"]), float(edge["distance_um"]), float(edge["motion_distance_um"]))
+        for edge in expected
+    ]
+    actual_values = [
+        (edge.edge_probability, edge.distance_um, edge.motion_distance_um)
+        for edge in actual.edges
+    ]
+    for actual_row, expected_row in zip(actual_values, expected_values):
+        assert actual_row == pytest.approx(expected_row)
+    assert actual.stats.frames_processed == notebook_stats["motion_relink_frames"]
+    assert actual.stats.tight_edges == notebook_stats["motion_relink_tight_edges"]
+    assert actual.stats.relaxed_edges == notebook_stats["motion_relink_relaxed_edges"]

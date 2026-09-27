@@ -102,6 +102,54 @@ PYTHONPATH=src python3 scripts/compare_local_evaluations.py \
 The comparison fails if the OOF dataset sets differ and writes win/tie/loss
 counts plus deltas for the official components and failure categories.
 
+## Paired OOF promotion evidence gate
+
+`scripts/evaluate_promotion_gate.py` is a CPU-only **structural validator and scorer**. It does not run inference or train fold-excluded weights. It checks the declared metrics, including the arithmetic relationship between edge TP/FP/FN, `node_count_ratio`, and adjusted edge Jaccard, but schema v1 has no trusted signed runtime/scorer attestation. Therefore it always reports `promote=false`; it cannot authorize promotion, even when the metric checks pass. `scripts/run_oof_checkpoint.py --motion-relink` offers a local Gold-model ablation that applies the EMA relinker before graph construction/ILP. This one-to-one relinking path does not reconstruct the staged Kaggle candidate's later division-repair step, and it does **not** reproduce or validate the exact `0.946` Kaggle pipeline.
+
+### Run or reuse the isolated Gold OOF ablation
+
+Run the baseline with the flag off and the candidate with `--motion-relink`, using the **same fold-excluded weights, fold, split, config, and detection threshold**. Supply the actual prepared split JSON, fold checkpoint, and data paths for this workspace; these artifacts are not currently checked in. Example candidate invocation:
+
+```bash
+PYTHONPATH=src python3 scripts/run_oof_checkpoint.py \
+  --config configs/gold_training.yaml \
+  --splits /path/to/prepared_folds.json \
+  --fold-index 0 \
+  --candidate gold-candidate-name \
+  --epoch 20 \
+  --weights /path/to/fold-excluded/checkpoint.pth \
+  --motion-relink
+```
+
+The flag is off by default. It uses tight/relaxed physical gates of 6/10 µm, velocity weight `0.5`, learned-edge bonus `1.0`, and a 2,600-node-per-frame cap. It requires indexed edge tuples `(source_index, target_index, probability, distance)` and fails closed if the upstream contract changes. If a frame exceeds the cap, relinking is skipped and the predictor's original edges are retained; otherwise only edges selected by the relinker survive, including an empty result when all proposed edges are rejected. `--motion-relink` cannot be combined with `--use-overlay`, so the ablation does not conflate those changes. Candidate outputs go under an `ema_motion_relink_v1/` subdirectory; sidecars bind config/counters, the checkpoint SHA256, the local runner/helper, and all Python files under the configured upstream `scripts/` and `src/` trees to each GEFF file/directory hash. Matching `--resume` or `--score-only` runs verify these bindings before reuse. These hashes are integrity metadata, not trusted proof that the declared code executed.
+
+Output paths beneath the resolved configured output root reject symlinked descendants (including intermediate directories and final GEFF/sidecar paths) before writes.
+
+Fresh runs execute neural inference (CUDA is the practical route, though `--device cpu` is supported); `--score-only` evaluates an already complete, matching output directory and is CPU-capable. Even with `--score-only`, the checkpoint path and matching upstream source tree must remain present because the runner hashes them before validating reuse. The run manifest and sidecars are local execution records, not a complete `evidence.json` and not independent proof that the stated source was executed. No real prediction or score has been generated for this ablation.
+
+Once complete parent/candidate results from both folds have been converted into the documented `evidence.json` contract, run:
+
+```bash
+PYTHONPATH=src python3 scripts/evaluate_promotion_gate.py \
+  --evidence outputs/ema_oof/evidence.json \
+  --output-receipt outputs/ema_oof/promotion_receipt.json
+```
+
+The manifest uses schema version 1. Its paths are relative to and must remain inside the manifest's directory, and every artifact reference contains `path` and a 64-character `sha256`. It records:
+
+- the exact parent/candidate names, distinct method IDs, source files/hashes, and one declared changed factor;
+- the A/B split file and official metric ID/version/source hash;
+- exactly four run records: parent and candidate on each of folds A and B;
+- each run's run manifest, OOF manifest, checkpoint, fixed inference config, one prediction artifact per held-out dataset, official summary, and per-dataset metrics CSV.
+
+The run manifest must bind the run/candidate/commit to its fold, split and config hashes, exact training and evaluation dataset lists, method source, and scorer. The OOF manifest must bind those values to the held-out dataset list, checkpoint and prediction hashes, and inference settings. The paired parent/candidate runs must use identical weights, config, scorer, split, and inference settings; the declared method IDs/source hashes must identify the one intended delta. The validator re-hashes the referenced files, checks train/test/excluded separation and exact A/B coverage, rejects duplicate or non-finite metrics, verifies adjusted edge Jaccard from edge counts and node-count ratio, and cross-checks each fold's recomputed score against its recorded official summary. It follows `J * (1 - 0.1 * (node_count_ratio - 1))`, lower-clamped at zero but not upper-clamped; under-counting can therefore yield an adjusted value above 1.0. For each per-dataset row, a zero division denominator maps to Jaccard 1.0 and contributes the weighted `+0.1` term to that row's diagnostic score; the pooled score instead computes division Jaccard from summed counts, using 1.0 only when the pooled denominator is zero. Review the actual code diff independently: the changed-factor label and source hash do not prove that only that code path changed or that the source was executed. Schema v1 cannot establish trusted runtime/scorer provenance.
+
+Exact v1 producer keys: `evidence.json` contains `schema_version`, `experiment` (`parent`, `candidate`, `changed_factor`), `metric` (`id`, `version`, `source`), `split`, and `runs`. Each variant has `name`, `method_id`, and `method_source`; each run has `variant`, `fold`, `run_manifest`, `oof_manifest`, `checkpoint`, `config`, `predictions` (a list of `{dataset, path, sha256}`), `official_summary`, and `per_dataset`. Run-manifest JSON requires `run_id`, `candidate`, `fold`, `commit_sha`, `split_sha256`, `config_sha256`, `training_datasets`, `evaluation_datasets`, `method_id`, `method_sha256`, `metric_id`, `metric_version`, and `metric_source_sha256`. OOF-manifest JSON requires `run_id`, `candidate`, `fold`, `datasets`, `split_sha256`, `config_sha256`, `checkpoint_sha256`, `run_manifest_sha256`, the same method/metric identifiers and hashes, `predictions_sha256` (dataset-to-hash mapping), and a non-empty `oof_inference` object. Each official summary requires `score` and `n`. Each per-dataset CSV requires `dataset`, `score`, `adj_edge_jaccard` (or `adjusted_edge_jaccard`), `edge_tp/fp/fn`, `division_tp/fp/fn`, `node_recall`, `node_count_ratio`, `edges_fragmented`, `edges_lost_to_detection`, and `wrong_association_edges`. The split JSON is the A/B list with `name`, `train`, `test`, and `excluded` fields used by `scripts/prepare_gold_training.py`.
+
+The score gate requires a pooled micro-averaged gain of at least `+0.001`, no fold-level score drop below `-0.003`, and no individual held-out dataset score drop below `-0.003`. For the currently undefined “material regression” clause, the implementation is deliberately conservative: at pooled, fold, **and individual-dataset** level, any decline beyond a `1e-9` floating-point comparison epsilon in adjusted-edge Jaccard, division Jaccard, or node recall, any move in node-count ratio farther from 1.0, or any increase in fragmentation/detection-loss/wrong-association counts blocks promotion and requires review. No material-regression tolerance is invented. The structural report includes per-video deltas and the hashes of all verified artifacts.
+
+Exit status: `1` means valid structural evidence was assessed but promotion remains blocked; `2` means evidence was invalid or incomplete. A valid v1 report is written with `promote=false` because no trusted runtime/scorer attestation is supported. Status `0` is unreachable until the evidence contract and validator gain an independently trusted attestation path. SHA256 checks prove that files match their declared hashes, not that a source file was executed. The local Gold OOF mode above does not yet produce the four-run v1 package, and no real EMA predictions or paired score evidence exist. Never hand-author `evidence.json` or set `promote` yourself. Passing synthetic tests validate only the structural checks; they are not score evidence.
+
 ## Community references
 
 - Official scorer and metric docs: https://github.com/royerlab/kaggle-cell-tracking-competition
