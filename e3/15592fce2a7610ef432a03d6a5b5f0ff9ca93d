@@ -1,0 +1,19 @@
+results/kaggle_lb/submissions.csv
+  s_91e53d406b7286::t_8ef20fa4916ee2 10-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "e315592fce2a7610ef432a03d6a5b5f0ff9ca93d",
+  "prompts": {},
+  "sessions": {
+    "s_91e53d406b7286": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "31926122-5522-4e13-a68d-14d2cdf638a1",
+        "model": "gemini-3.8-flash"
+      },
+      "human_author": "Aleix López <aleix.lopez@glovoapp.com>"
+    }
+  }
+}
