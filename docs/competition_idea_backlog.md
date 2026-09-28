@@ -100,6 +100,48 @@
 
 **Work after the competition:** train fold-disjoint models, use synthetic-to-real validation, and verify external data provenance. The 18.5 GB dataset and domain gap make this unsuitable as a last-minute unvalidated training run.
 
+### B7 — Graph-level bipartite consensus ensembling
+
+**Priority:** P1 — high expected value; runs on CPU locally or lightweight on GPU.<br>
+**Status:** Ready to implement. Candidate submissions from distinct model paradigms are available (0.946 Edge-TTA, 0.956 Sub-Voxel Flow Harmonic, Super-Fusion).
+**Compute:** CPU-only for graph consensus solving.
+**Hypothesis:** Ensembling distinct cell tracking graphs by retaining high-confidence consensus edges and resolving ambiguous connections with spatial distance/DeepCenter priors reduces track fragmentation and guards against private test shakeup (+0.002 to +0.004 expected gain).
+**Work:** Take prediction CSVs from two or three distinct submissions. Match nodes across predictions within 3.5 µm. For temporal edges, admit edges where models agree; for contested edges, select the candidate with higher harmonic link probability and minimum spatial divergence. Ensure strict Kaggle submission format compliance.
+
+### B8 — Pretrained DivNet 3D-CNN mitosis verification on the 0.956+ stack
+
+**Priority:** P1 — directly targets the single lowest submetric (division Jaccard is ~0.18–0.23).<br>
+**Status:** Pretrained weights exist in public dataset `giorgosi/biohub-divnet-v2` (`best_overall.pt`); validated in `haideptry/biohub-0-951` but unmerged into the 0.956 / Super-Fusion stack.
+**Compute:** Kaggle GPU (~2 additional minutes of inference time per movie).
+**Hypothesis:** Mitosis false positives heavily penalize both division Jaccard and adjusted edge Jaccard. While our current 0.956 / Super-Fusion stacks use geometric divergence rules (sister symmetry, 3-frame horizon), a neural patch classifier inspecting the raw volumetric intensity around putative divisions will veto false splits that geometry alone cannot detect.
+**Work:** Attach `giorgosi/biohub-divnet-v2` to the Super-Fusion kernel. Crop 3D patches centered on candidate division mother-daughter centroids and run forward inference through `DivNetMitosisClassifier`. Veto candidate divisions where $P(\text{div}) < 0.50$.
+
+### B9 — Adaptive global node-count calibration (N_pred penalty control)
+
+**Priority:** P2 — addresses the adjusted edge Jaccard denominator penalty.<br>
+**Status:** Concept defined; inspired by competitor feedback (Topic #741749).
+**Compute:** CPU / config-level threshold logic.
+**Hypothesis:** The official metric penalizes over-detection directly: $J_{\text{adj}} = \frac{|E \cap \hat{E}|}{|E \cup \hat{E}| + \max(0, N_{\text{pred}} - N_{\text{true}})}$. Deeper or dual models tend to inflate $N_{\text{pred}}$, causing a penalty that outweighs small recall gains. Calibrating the total predicted node count to match expected developmental cell density per timepoint maximizes the denominator efficiency.
+**Work:** Calculate average cell count per developmental stage from training metadata. If a test movie produces $N_{\text{pred}} > 1.05 \times N_{\text{expected}}$, dynamically raise the detection threshold from 0.960 to 0.965 or prune short, isolated single-node components.
+
+### B10 — Density-adaptive tissue flow radius
+
+**Priority:** P2 — enhances neighborhood-flow motion relinking across heterogeneous movies.<br>
+**Status:** Flow prior currently uses fixed $R = 40\text{--}48\,\mu\text{m}$ and $k = 12\text{--}16$.
+**Compute:** Inline CPU post-processing within kernel execution.
+**Hypothesis:** Early-stage embryos have widely spaced cells ($>60\,\mu\text{m}$ apart), while late-stage embryos have hundreds of tightly packed cells. A fixed $40\,\mu\text{m}$ radius pools irrelevant cells in dense movies and too few cells in sparse movies. Adapting the radius based on local density ($R_{\text{flow}} \propto 1/\sqrt{\rho}$) improves trajectory coherence.
+**Work:** Estimate local centroid density $\rho$ in each frame. Dynamically scale the neighbor radius between $25\,\mu\text{m}$ (dense clusters) and $60\,\mu\text{m}$ (early stages).
+
+### B11 — Final two-submission portfolio selection strategy
+
+**Priority:** P0 — mandatory before competition close (September 29, 23:59 UTC).<br>
+**Status:** Strategy drafted.
+**Compute:** Manual selection on Kaggle competition dashboard.
+**Hypothesis:** Selecting two correlated high-scoring public variants maximizes shakeup risk. The optimal portfolio pairs the highest-ceiling innovation with an orthogonal, proven safety anchor.
+**Work:** 
+- **Slot 1 (Highest Ceiling):** The highest-scoring multi-model SOTA candidate (Super-Fusion / DivNet candidate, targeting 0.958–0.962).
+- **Slot 2 (Safety Anchor):** Our verified baseline `56132481` (0.946 Edge TTA) or the B7 consensus graph ensemble, completely insulated from hyperparameter overfitting on the public test set.
+
 ## Explicit no-go / avoid duplicate work
 
 - **Never include `augment_dataset` / `MAX_COMPONENTS` / `FORKS` metric-exploit injection.** The old notebook audit found out-of-volume synthetic graph artifacts; the organizers patched the scorer and rescored submissions. Keep the clean graph output only.[6]
