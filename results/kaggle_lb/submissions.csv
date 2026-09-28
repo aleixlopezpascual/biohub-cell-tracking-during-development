@@ -11,6 +11,8 @@ submission_id,candidate,submitted_at,commit_sha,submission_csv_path,local_cv_sco
 56639822,biohub-active-mitosis-recovery,2026-09-28T11:53:17.197000Z,57f6e19,,,,,,SubmissionStatus.PENDING,"Submitted via Kaggle kernel aleixlopez/biohub-active-mitosis-recovery version 1. Loosens sister symmetry gate to tau <= 0.80 and max sister distance to 18 um, and uses DivNet 3D-CNN visual confidence (P >= 0.65) to actively rescue asymmetric true cytokinesis events."
 56640103,biohub-consensus-ensemble-sota,2026-09-28T12:04:27.080000Z,1f35417,,,,,,SubmissionStatus.PENDING,"Submitted via Kaggle kernel aleixlopez/biohub-consensus-ensemble-sota version 3. Full in-line bipartite consensus ensembling merging 0.946 Edge-TTA with 0.953 Subvoxel Flow Harmonic directly on the hidden test set."
 56640857,biohub-0-959-frontier-sota,2026-09-28T12:33:49.697000Z,9e0f2c2,,,,,,SubmissionStatus.PENDING,"Submitted via Kaggle kernel aleixlopez/biohub-0-959-frontier-sota version 1. Implements John Taylor's Topic 743929 blueprint: slashes ILP division weight from 1.2 to 0.4 (-67%) and lowers track-end readmit threshold from 0.965 to 0.94 to bridge broken ends without inflating N_pred. Retains strict 0.965 det threshold, 0.90 retention, and DivNet 3D-CNN mitosis veto."
+56642184,biohub-density-calibrated-flow,2026-09-28T13:28:30.793000Z,9a4332f,,,,,,SubmissionStatus.PENDING,"Submitted via Kaggle kernel aleixlopez/biohub-density-calibrated-flow version 1. Implements B10 density-adaptive neighborhood flow radius and B9 isolated singleton pruning to strictly suppress N_pred denominator penalty, combined with John Taylor 0.959 ILP division weight (0.4) and readmit (0.94) knobs."
+
 
 
 
