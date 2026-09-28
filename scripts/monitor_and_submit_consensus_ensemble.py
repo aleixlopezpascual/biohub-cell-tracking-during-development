@@ -6,8 +6,8 @@ import sys
 
 KERNEL_REF = "aleixlopez/biohub-consensus-ensemble-sota"
 COMPETITION_NAME = "biohub-cell-tracking-during-development"
-VERSION = "1"
-MESSAGE = "Biohub Consensus Ensemble SOTA (0.946 Edge-TTA + 0.953 Subvoxel Flow Harmonic Bipartite Consensus) Version 1"
+VERSION = "2"
+MESSAGE = "Biohub Consensus Ensemble SOTA (0.946 Edge-TTA + 0.953 Subvoxel Flow Harmonic Bipartite Consensus) Version 2"
 
 
 def check_status() -> str:
