@@ -37,8 +37,10 @@
 |---|---|---|---|
 | **Candidate 1** (`biohub-0-956-subvoxel-flow-harmonic`) | Subvoxel `v1284` + Tissue Flow | Complete | **`0.953` (Scored, Rank 837)** |
 | **Candidate 4** (`biohub-0-956-divnet-vetted`) | Candidate 1 + DivNet 3D-CNN mitosis veto | Complete | **`56634490` (Pending Evaluation)** |
-| **Candidate 5** (`biohub-consensus-ensemble-sota` v2) | In-line Bipartite Consensus (0.946 + 0.953) | **RUNNING** on T4 GPU | Background watcher active (PID `75649`) |
-| **Candidate 6** (`biohub-active-mitosis-recovery`) | Loosened symmetry ($\tau \le 0.80$) + DivNet neural rescue | **RUNNING** on T4 GPU | Background watcher active (PID `96201`) |
+| **Candidate 5** (`biohub-consensus-ensemble-sota` v3) | In-line Bipartite Consensus (0.946 + 0.953) | Complete | **`56640103` (Pending Evaluation)** |
+| **Candidate 6** (`biohub-active-mitosis-recovery`) | Loosened symmetry ($\tau \le 0.80$) + DivNet neural rescue | Complete | **`56639822` (Pending Evaluation)** |
+| **Candidate 7** (`biohub-0-959-frontier-sota`) | John Taylor Topic 743929: ILP div 0.4 + Readmit 0.94 | Complete | **`56640857` (Pending Evaluation)** |
+| **Candidate 8** (`biohub-density-calibrated-flow`) | B10 density-adaptive flow + B9 singleton pruning | **RUNNING** on T4 GPU | Background watcher active (PID `81892`) |
 
 ---
 
