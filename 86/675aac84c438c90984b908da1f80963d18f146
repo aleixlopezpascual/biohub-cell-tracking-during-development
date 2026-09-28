@@ -1,0 +1,21 @@
+results/kaggle_lb/submissions.csv
+  s_91e53d406b7286::t_0a93f2815cb160 13-14
+docs/endgame_next_steps_and_blockers.md
+  s_91e53d406b7286::t_98d3e33b294e98 40-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "86675aac84c438c90984b908da1f80963d18f146",
+  "prompts": {},
+  "sessions": {
+    "s_91e53d406b7286": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "31926122-5522-4e13-a68d-14d2cdf638a1",
+        "model": "gemini-3.8-flash"
+      },
+      "human_author": "Aleix López <aleix.lopez@glovoapp.com>"
+    }
+  }
+}
