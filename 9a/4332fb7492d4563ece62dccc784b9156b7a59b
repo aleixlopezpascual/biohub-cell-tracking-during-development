@@ -1,0 +1,21 @@
+tests/test_density_calibrated_flow.py
+  s_91e53d406b7286::t_48515ff626c842 1-89
+scripts/monitor_and_submit_density_calibrated.py
+  s_91e53d406b7286::t_0f26dfd732278a 1-85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "9a4332fb7492d4563ece62dccc784b9156b7a59b",
+  "prompts": {},
+  "sessions": {
+    "s_91e53d406b7286": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "31926122-5522-4e13-a68d-14d2cdf638a1",
+        "model": "gemini-3.8-flash"
+      },
+      "human_author": "Aleix López <aleix.lopez@glovoapp.com>"
+    }
+  }
+}
