@@ -1,0 +1,19 @@
+docs/endgame_next_steps_and_blockers.md
+  s_91e53d406b7286::t_f070e99d6ea76c 3,5,7,9,11-14,16,18,20-30,32,34,36,38-41,43,45,47-49,51-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "5cf8dbadd6dadd49c188efda995fee52951c7f14",
+  "prompts": {},
+  "sessions": {
+    "s_91e53d406b7286": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "31926122-5522-4e13-a68d-14d2cdf638a1",
+        "model": "gemini-3.8-flash"
+      },
+      "human_author": "Aleix López <aleix.lopez@glovoapp.com>"
+    }
+  }
+}
