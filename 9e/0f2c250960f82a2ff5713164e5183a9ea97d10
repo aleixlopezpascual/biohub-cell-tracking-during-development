@@ -1,0 +1,21 @@
+scripts/monitor_and_submit_0959_frontier.py
+  s_91e53d406b7286::t_bb2caa39e37822 1-85
+tests/test_0959_frontier_staging.py
+  s_91e53d406b7286::t_1930f89ed3fe72 1-88
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "9e0f2c250960f82a2ff5713164e5183a9ea97d10",
+  "prompts": {},
+  "sessions": {
+    "s_91e53d406b7286": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "31926122-5522-4e13-a68d-14d2cdf638a1",
+        "model": "gemini-3.8-flash"
+      },
+      "human_author": "Aleix López <aleix.lopez@glovoapp.com>"
+    }
+  }
+}
