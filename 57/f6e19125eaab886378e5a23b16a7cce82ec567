@@ -1,0 +1,21 @@
+tests/test_active_mitosis_recovery.py
+  s_91e53d406b7286::t_aec5979685ea26 1-85
+scripts/monitor_and_submit_active_mitosis.py
+  s_91e53d406b7286::t_854eb5751b0500 1-85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "57f6e19125eaab886378e5a23b16a7cce82ec567",
+  "prompts": {},
+  "sessions": {
+    "s_91e53d406b7286": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "31926122-5522-4e13-a68d-14d2cdf638a1",
+        "model": "gemini-3.8-flash"
+      },
+      "human_author": "Aleix López <aleix.lopez@glovoapp.com>"
+    }
+  }
+}
