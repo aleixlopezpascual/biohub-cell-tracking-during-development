@@ -1,0 +1,19 @@
+docs/skills/kaggle-endgame-competitions/SKILL.md
+  s_91e53d406b7286::t_08c77f13f9bda2 1-101
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "fe211b2581f11f0e290bcd1141d63ca82b995051",
+  "prompts": {},
+  "sessions": {
+    "s_91e53d406b7286": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "31926122-5522-4e13-a68d-14d2cdf638a1",
+        "model": "gemini-3.8-flash"
+      },
+      "human_author": "Aleix López <aleix.lopez@glovoapp.com>"
+    }
+  }
+}
