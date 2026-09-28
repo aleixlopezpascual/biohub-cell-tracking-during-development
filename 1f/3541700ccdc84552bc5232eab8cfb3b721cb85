@@ -1,0 +1,24 @@
+scripts/monitor_and_submit_consensus_ensemble.py
+  s_91e53d406b7286::t_33a4c6d4cefde9 1-85
+scripts/verify_final_selections.py
+  s_91e53d406b7286::t_d02c075cf33dda 1-102
+tests/test_consensus_ensemble_staging.py
+  s_91e53d406b7286::t_213f3c24cd8d6e 1-67
+  s_91e53d406b7286::t_37ab37756dd0cc 68-69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "1f3541700ccdc84552bc5232eab8cfb3b721cb85",
+  "prompts": {},
+  "sessions": {
+    "s_91e53d406b7286": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "31926122-5522-4e13-a68d-14d2cdf638a1",
+        "model": "gemini-3.8-flash"
+      },
+      "human_author": "Aleix López <aleix.lopez@glovoapp.com>"
+    }
+  }
+}
