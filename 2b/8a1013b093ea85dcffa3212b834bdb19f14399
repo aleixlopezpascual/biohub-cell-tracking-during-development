@@ -1,0 +1,19 @@
+docs/top_solutions_and_competitive_postmortem.md
+  s_cecef12bd4f199::t_68aeca1b21badd 160-196
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "2b8a1013b093ea85dcffa3212b834bdb19f14399",
+  "prompts": {},
+  "sessions": {
+    "s_cecef12bd4f199": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "ddb75aa1-e1fb-4f24-8fac-f31070d5fe15",
+        "model": "gemini-3.8-flash"
+      },
+      "human_author": "Aleix López <aleix.lopez@glovoapp.com>"
+    }
+  }
+}
