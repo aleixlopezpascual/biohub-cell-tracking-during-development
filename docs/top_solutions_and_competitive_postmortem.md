@@ -157,7 +157,43 @@ Raw OME-Zarr (T, Z, Y, X)
 
 ---
 
-## 5. Key Architecture Blueprints for Future 3D/4D Biomedical Challenges
+## 5. Hardware, Compute Environments & LLM Tooling
+
+### Did Top Teams Use LLMs to Code?
+* **Tactical Assistance vs. Autonomous Agents:** In their official post-mortems, none of the top-performing teams credited LLMs or autonomous agents as core methodological drivers of their solutions. Kaggle Grandmasters (such as `yu4u` and `@theoviel`) possess mature, proprietary computer-vision codebases developed across years of competitions (e.g., directly porting their winning 2.5D slice-stacking backbone from *CZII CryoET*).
+* **Community Discussions:** LLMs (ChatGPT, Claude, Cursor) were widely used interactively across the forum as tactical co-pilots for writing boilerplate, generating vectorized NumPy/SciPy snippets, and debugging complex loss formulations. For example, Kaggle Grandmaster `hengck23` explicitly advised competitors in a thread on sparse cell annotations:
+  > *"At each pixel location after UNet logit head, loss = softmax of pixel over its neighbors... Hint: ask ChatGPT to write a margin loss version: peak is at least $T$ greater than neighbor."*
+* **The Bottom Line:** While LLMs accelerated implementation speed, **no autonomous coding agent discovered the winning competitive edge**. The decisive leaps—uncovering integer voxel discretization, formulating the DoG background exclusion mask, discovering embryo-specific Z-annotation shifts, and diagnosing physical microscope stage drift—required human exploratory data analysis (EDA) and biological intuition.
+
+---
+
+### Development Setups & Engineering Stacks
+
+1. **The "From-Scratch" Deep Learning Stack (3rd Place — `yu4u & ren4yu`):**
+   * **Frameworks:** PyTorch, MONAI (`SegResNet`), and torchvision.
+   * **Mathematical Optimization:** Replaced legacy heuristic trackers with modern mathematical programming solvers (**HiGHS**), formulating graph tracking as a unified Mixed-Integer Linear Program (MILP) with hard biological constraints.
+   * **Validation Engine:** Strict 5-fold cross-validation grouped by embryo prefix to ensure zero data leakage across videos.
+
+2. **The "Hybrid Tuned + Tabular/CNN Repair" Stack (12th Place — `Team Corwin`):**
+   * **Hybrid Tooling:** Rather than training heavy backbones, they froze public 3D U-Net checkpoints and layered **25 LightGBM boosters** (trained on 70 geometric/temporal features) and lightweight PyTorch CNNs (a 2.8M parameter mitosis reader and a 3D coordinate-offset regression CNN).
+   * **Production Defensiveness:** Rigorous runtime hardening—including per-video timers, SHA-256 weight checksums, offline packaging of 32 wheels, and an immediate $t+0$ emergency submission writer to prevent Kaggle test-set timeouts.
+
+---
+
+### The Compute Reality: External GPUs vs. Kaggle T4s
+
+* **Training Required External GPUs:**
+  * Kaggle provides a free weekly quota of **30 hours on 2× NVIDIA T4 GPUs** (16 GB VRAM each).
+  * For 4D Zarr microscopy volumes, this hardware was insufficient for full training. As Team Corwin documented, training a single 3D U-Net on 2× T4 GPUs took **35 to 40 minutes per epoch** and suffered frequent Out-Of-Memory (OOM) errors at batch size 16.
+  * Training 5 folds of EfficientNetV2-L, 5 folds of EfficientNet-B7, and 5 folds of 3D SegResNet (plus dense flow and attention matching models, as 3rd place did) required **hundreds of GPU-hours on 24GB+ VRAM hardware** (e.g., local multi-RTX 3090/4090s, A6000s, or cloud instances on Lambda/RunPod/GCP).
+  * Team Corwin explicitly noted that they developed and benchmarked locally on an **NVIDIA RTX 2000 Ada Generation** workstation GPU before scaling their pipeline to Kaggle.
+* **Inference Was Strictly Constrained to Kaggle T4s:**
+  * Because Biohub was an offline code competition, all models had to execute on the hidden private test set within Kaggle's **2× T4 GPUs under a 12-hour hard timeout**.
+  * Top teams engineered aggressive inference optimizations: 3rd place downsampled coordinate grids to $1.625\,\mu\text{m}$ for flow and attention matching, spending ~55% of their total runtime on detection, while Team Corwin executed their entire 6-stage repair chain in **6.8 to 8.4 hours**.
+
+---
+
+## 6. Key Architecture Blueprints for Future 3D/4D Biomedical Challenges
 
 When tackling future 3D+time microscopy or cell lineage competitions, the definitive design pattern is:
 
