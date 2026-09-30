@@ -1,17 +1,17 @@
 # Biohub Cell Tracking: Final Competition Retrospective & Official Standings
 
 **Competition:** Biohub - Cell Tracking During Development (Kaggle)  
-**Total Teams:** 4,020  
-**Final Official Standing:** **Rank 376** (Top 9.3%)  
-**Award:** **Kaggle Competition Bronze Medal** 🥉  
-**Final Best Scores:** **0.956 Public LB** / **0.919 Private LB**  
+**Total Teams:** 4,017  
+**Final Official Private Standing:** **Rank 653** (Top 16.2%)  
+**Public Standing:** **Rank 376** (Top 9.3%, Score 0.956)  
+**Final Best Scores:** **0.956 Public LB** / **0.919 Private LB** (Selected: 0.917 Private LB)  
 **Author:** Aleix López & AI Research Assistant  
 
 ---
 
 ## 1. Executive Summary & Progression
 
-Over the course of the competition campaign, our repository progressed from early classical baselines to state-of-the-art neural lineage reconstruction, securing a **Top 9.3% finish** in a 4,020-team international competition:
+Over the course of the competition campaign, our repository progressed from early classical baselines to state-of-the-art neural lineage reconstruction:
 
 ```
 [Start] 0.251 Heuristic Baseline
@@ -23,11 +23,18 @@ Over the course of the competition campaign, our repository progressed from earl
 [Phase 2] 0.946 Edge-Feature TTA Tuned Baseline (Rank 1,366)
    │
    ▼
-[Phase 3] 0.953 Subvoxel Flow Harmonic Breakthrough (Rank 837, +529 positions)
+[Phase 3] 0.953 Subvoxel Flow Harmonic Breakthrough (Rank 837)
    │
    ▼
-[Endgame] 0.956 Public / 0.919 Private (Rank 376, Bronze Medal Zone 🥉)
+[Endgame] 0.956 Public LB (Rank 376) ──▶ Private LB 0.917 (Final Official Rank: 653, Top 16.2%)
 ```
+
+### Clarification on Medal Cutoff
+- In a 4,017-team competition, the Kaggle Bronze Medal threshold is **Top 10% (Rank 401 or better)**.
+- While our peak Public Leaderboard score of **`0.956`** sat at **Rank 376** (inside the top 10% threshold), the official competition ranking is determined exclusively by the **Private Leaderboard (71% hidden test set)**.
+- Our automatically selected submission achieved a Private Score of **`0.917`**, landing at **Rank 653** (Top 16.2%), just outside the medal boundary.
+- Notably, our unselected **Active Mitosis Recovery** candidate (`56639822`) achieved a higher Private Score of **`0.919`**, proving the superior generalization of neural cytokinesis rescue.
+
 
 ---
 
