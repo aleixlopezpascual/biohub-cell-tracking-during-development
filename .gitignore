@@ -1,16 +1,44 @@
+# Python bytecode and caches
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 *.egg-info/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-dist/
-outputs/
-build/
-*.zarr
-*.pt
+
+# Virtual environments
 .venv/
 venv/
-__pycache__/
-*.pyc
-.pytest_cache/
+ENV/
+env/
+
+# Build and distribution artifacts
+dist/
+build/
+outputs/
+*.egg
+
+# Data volumes and heavy model weights
+*.zarr
+*.pt
+*.pth
+*.onnx
+
+# Secrets, credentials, and environment variables
+*.env
+.env*
+*.pem
+*.key
+kaggle.json
+id_rsa
+id_ecdsa
+id_ed25519
+
+# Agent scratch and OS files
+.hermes/
+.superpowers/
+.DS_Store
+*.log
+Thumbs.db

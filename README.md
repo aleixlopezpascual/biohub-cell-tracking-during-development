@@ -8,9 +8,25 @@ official competition metrics, and a deterministic submission exporter.
 Metric behavior follows the official reference:
 https://github.com/royerlab/kaggle-cell-tracking-competition/blob/main/metrics.md
 
-## Competition endgame status
+## Competition endgame status & official outcome
 
-For the current verified Biohub score, staged-candidate blockers, next action, and CPU/GPU requirements, start with [`docs/endgame_next_steps_and_blockers.md`](docs/endgame_next_steps_and_blockers.md). The documentation index is [`docs/README.md`](docs/README.md). Historical leaderboard snapshots and archived quota-reset plans are explicitly dated and should not be treated as live status or authorization to run/submit.
+- **Official Private Leaderboard:** **Rank 653 of 4,017 teams** (Top 16.2%, Selected Private Score `0.917`).
+- **Peak Leaderboard Marks:** **`0.956` Public LB** (Rank 376) and **`0.919` Private LB** (achieved by Candidate `56639822`, Active Mitosis Recovery).
+- **Final Retrospective & Analysis:** See [`docs/final_competition_retrospective_and_results.md`](docs/final_competition_retrospective_and_results.md) and [`docs/overfitting_risk_and_final_selection.md`](docs/overfitting_risk_and_final_selection.md).
+- **Complete Submission Ledger:** See [`results/kaggle_lb/submissions.csv`](results/kaggle_lb/submissions.csv).
+
+## Key Algorithmic Contributions
+
+1. **Continuous Sub-Voxel Coordinate Regression (`v1284_head.pt`):**
+   Regresses continuous $(z, y, x)$ offsets from 3D U-Net feature gradients around peak detections and applies continuous trilinear feature interpolation in `UNetNodeTransformer`, eliminating grid-quantization errors.
+2. **Collective Neighborhood Tissue Flow Prior:**
+   Estimates developmental drift velocity from the collective motion of the 12–16 nearest neighbors within $40\text{--}48\,\mu\text{m}$, stabilizing track association through cellular crossings.
+3. **DivNet 3D-CNN Active Mitosis Recovery:**
+   Loosens rigid geometric sister symmetry gates ($\tau \le 0.80$) and uses a 3D-CNN patch classifier (`giorgosi/biohub-divnet-v2`) to visually confirm cytokinesis, delivering our top generalization mark of **`0.919` Private LB**.
+4. **In-Line Bipartite Graph Consensus Ensembling:**
+   Fuses distinct cell tracking graphs in memory frame-by-frame (`src/biohub_tracking/tracking/ensemble.py`), resolving contested links with 3D spatial proximity while preserving graph degree invariants.
+5. **Strict Denominator Penalty Protection ($N_{\text{pred}}$ Shield):**
+   Identified and eliminated element-wise `torch.maximum` detection ensembling (which dragged scores to $0.901$ by inflating false positives), keeping detection thresholds at $0.965$ and pruning isolated singletons.
 
 ## Install
 
