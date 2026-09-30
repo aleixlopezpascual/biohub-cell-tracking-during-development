@@ -13,6 +13,7 @@ https://github.com/royerlab/kaggle-cell-tracking-competition/blob/main/metrics.m
 - **Official Private Leaderboard:** **Rank 653 of 4,017 teams** (Top 16.2%, Selected Private Score `0.917`).
 - **Peak Leaderboard Marks:** **`0.956` Public LB** (Rank 376) and **`0.919` Private LB** (achieved by Candidate `56639822`, Active Mitosis Recovery).
 - **Final Retrospective & Analysis:** See [`docs/final_competition_retrospective_and_results.md`](docs/final_competition_retrospective_and_results.md) and [`docs/overfitting_risk_and_final_selection.md`](docs/overfitting_risk_and_final_selection.md).
+- **Top Solutions & Meta Learnings Post-Mortem:** See [`docs/top_solutions_and_competitive_postmortem.md`](docs/top_solutions_and_competitive_postmortem.md) for an in-depth review of the winning approaches (3rd, 12th, 14th, 361st) and comparative analysis against this codebase.
 - **Complete Submission Ledger:** See [`results/kaggle_lb/submissions.csv`](results/kaggle_lb/submissions.csv).
 
 ## Key Algorithmic Contributions
@@ -190,3 +191,8 @@ Add `--oracle-analysis` to write detection-versus-linking headroom reports.
 The gated Kaggle training workflow is documented in
 `docs/cloud_kfold_training_design.md` and configured by
 `configs/gold_training.yaml`.
+
+## License
+
+This project is licensed under the MIT License - see the [`LICENSE`](LICENSE) file for details.
+
