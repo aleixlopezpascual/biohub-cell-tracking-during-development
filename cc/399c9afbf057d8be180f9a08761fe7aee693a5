@@ -1,0 +1,23 @@
+README.md
+  s_cecef12bd4f199::t_8c656a8afd594a 17
+docs/competitive_ml_agentic_playbook.md
+  s_cecef12bd4f199::t_6eab8a77435c0a 1-195
+docs/README.md
+  s_cecef12bd4f199::t_249281bf61119f 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "cc399c9afbf057d8be180f9a08761fe7aee693a5",
+  "prompts": {},
+  "sessions": {
+    "s_cecef12bd4f199": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "ddb75aa1-e1fb-4f24-8fac-f31070d5fe15",
+        "model": "gemini-3.8-flash"
+      },
+      "human_author": "Aleix López <aleix.lopez@glovoapp.com>"
+    }
+  }
+}
