@@ -1,0 +1,21 @@
+docs/final_competition_retrospective_and_results.md
+  s_91e53d406b7286::t_46b2eb093be93a 1-76
+results/kaggle_lb/submissions.csv
+  s_91e53d406b7286::t_c5970682d4eefc 10-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "25630d87bcfdc48a7c914031a3162648925c20dc",
+  "prompts": {},
+  "sessions": {
+    "s_91e53d406b7286": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "31926122-5522-4e13-a68d-14d2cdf638a1",
+        "model": "gemini-3.8-flash"
+      },
+      "human_author": "Aleix López <aleix.lopez@glovoapp.com>"
+    }
+  }
+}
