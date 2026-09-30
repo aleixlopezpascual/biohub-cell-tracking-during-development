@@ -2,6 +2,7 @@
 
 ## Competition retrospectives and top solutions
 
+- [`competitive_ml_agentic_playbook.md`](competitive_ml_agentic_playbook.md) — exhaustive post-mortem introspection: why we didn't win gold, 5 critical blind spots, agentic orchestration archetypes, and the 5-phase reusable playbook for future competitions.
 - [`top_solutions_and_competitive_postmortem.md`](top_solutions_and_competitive_postmortem.md) — in-depth review of top solutions (3rd, 12th, 14th, 361st), key meta learnings, and side-by-side comparative post-mortem with our solution.
 - [`final_competition_retrospective_and_results.md`](final_competition_retrospective_and_results.md) — official final competition results, submission ledger, official private rank, and retrospective.
 

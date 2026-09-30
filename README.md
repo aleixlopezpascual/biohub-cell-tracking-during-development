@@ -14,6 +14,7 @@ https://github.com/royerlab/kaggle-cell-tracking-competition/blob/main/metrics.m
 - **Peak Leaderboard Marks:** **`0.956` Public LB** (Rank 376) and **`0.919` Private LB** (achieved by Candidate `56639822`, Active Mitosis Recovery).
 - **Final Retrospective & Analysis:** See [`docs/final_competition_retrospective_and_results.md`](docs/final_competition_retrospective_and_results.md) and [`docs/overfitting_risk_and_final_selection.md`](docs/overfitting_risk_and_final_selection.md).
 - **Top Solutions & Meta Learnings Post-Mortem:** See [`docs/top_solutions_and_competitive_postmortem.md`](docs/top_solutions_and_competitive_postmortem.md) for an in-depth review of the winning approaches (3rd, 12th, 14th, 361st) and comparative analysis against this codebase.
+- **Winning Agentic Playbook & Introspection:** See [`docs/competitive_ml_agentic_playbook.md`](docs/competitive_ml_agentic_playbook.md) for the root-cause analysis of why we missed gold, how to deploy AI agents for competitive advantage, and the reusable 5-phase playbook.
 - **Complete Submission Ledger:** See [`results/kaggle_lb/submissions.csv`](results/kaggle_lb/submissions.csv).
 
 ## Key Algorithmic Contributions
