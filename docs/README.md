@@ -1,5 +1,10 @@
 # Documentation guide
 
+## Competition retrospectives and top solutions
+
+- [`top_solutions_and_competitive_postmortem.md`](top_solutions_and_competitive_postmortem.md) — in-depth review of top solutions (3rd, 12th, 14th, 361st), key meta learnings, and side-by-side comparative post-mortem with our solution.
+- [`final_competition_retrospective_and_results.md`](final_competition_retrospective_and_results.md) — official final competition results, submission ledger, official private rank, and retrospective.
+
 ## Active competition status and plan
 
 - **Start here:** [`endgame_next_steps_and_blockers.md`](endgame_next_steps_and_blockers.md) — current verified state, explicit blockers, ordered next actions, CPU/GPU requirements, and what (if anything) is needed from the user.
